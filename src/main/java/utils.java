@@ -40,6 +40,27 @@ public class utils {
         return newB;
     }
 
+    public static BigInteger[] constGen(int w) {
+        BigInteger[] pair;
+        switch (w) {
+            case 16:
+                pair = new BigInteger[]{new BigInteger("47073"),
+                        new BigInteger("40503")};
+                break;
+            case 32:
+                pair = new BigInteger[]{new BigInteger("3084996963"),
+                        new BigInteger("2654435769")};
+                break;
+            case 64:
+                pair = new BigInteger[]{new BigInteger("13249961062380153451"),
+                        new BigInteger("11400714819323198485")};
+                break;
+            default:
+                throw new IllegalStateException("Unexpected value: " + w + ". Available values: 16, 32, 64.");
+        }
+        return pair;
+    }
+
     public static byte[] reverse(BigInteger array,int w8) {
         byte[] data = new byte[w8];
         if (array.toByteArray().length > w8) {
@@ -80,9 +101,7 @@ public class utils {
 
     public static byte[] toW4Array(byte[] data, int lust, int w4){
         byte[] w4Array = new byte[w4];
-        byte length = data[lust];
-
-        System.arraycopy(data,lust,w4Array,0,w4);
+            System.arraycopy(data,lust,w4Array,0,w4);
         return w4Array;
     }
 
