@@ -19,10 +19,10 @@ public class utils {
         return xor;
     }
 
-    public static byte[] vector(int w8){
-        byte[] vector = new byte[w8];
+    public static byte[] genBytes(int size){
+        byte[] vector = new byte[size];
         new Random().nextBytes(vector);
-        System.out.println("vect"+ Arrays.toString(vector));
+        //System.out.println("vect"+ Arrays.toString(vector));
         return vector;
     }
 

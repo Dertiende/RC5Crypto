@@ -6,7 +6,6 @@ import java.nio.channels.FileLock;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
 
 public class rc5 {
@@ -64,7 +63,6 @@ public class rc5 {
             c = b / w8;
         }
         long[] L = new long[c];
-
         for (int i = b-1; i > -1 ; i--) {
             L[i / w8] = (L[i / w8] << 8) + Byte.toUnsignedInt(keyAl[i]);
         }
@@ -116,7 +114,6 @@ public class rc5 {
         }
         dataA = utils.reverse(BigInteger.valueOf(Al),w8);
         dataB = utils.reverse(BigInteger.valueOf(Bl),w8);
-
         return utils.byteSum(dataA,dataB);
     }
 
@@ -146,10 +143,10 @@ public class rc5 {
         return utils.byteSum(dataA,dataB);
     }
     int  encryptFile(String inpFileName,String outFileName) throws IOException {
-        size = Files.size(Paths.get("D:\\Users\\Alex\\IdeaProjects\\kriptolab\\inp.exe"));
+        size = Files.size(Paths.get(inpFileName));
         sizeModW4 = (int) (w4-size % w4);
         System.out.println("size "+ size % w4 + " "+ size);
-        lastBlock = utils.vector(w4);
+        lastBlock = utils.genBytes(w4);
         vector = Arrays.copyOf(lastBlock,w4);
         int bufferSize;
         byte[] buffer, encoded;
@@ -168,7 +165,10 @@ public class rc5 {
             bufferSize = 64000;
             encoded = new byte[64000];
         }
-        FileInputStream inputStream = new FileInputStream("D:\\Users\\Alex\\IdeaProjects\\kriptolab\\inp.exe");
+        FileInputStream inputStream = new FileInputStream(inpFileName);
+        FileOutputStream outputStream = new FileOutputStream(outFileName);
+        FileChannel outChannel = outputStream.getChannel();
+        FileLock lock = outChannel.lock();
         long startTime = System.currentTimeMillis();
         long finishTime = 0;
         byte[] w4Array;
@@ -202,14 +202,13 @@ public class rc5 {
                 lastBlock = Arrays.copyOf(w4Array,w4);
                 System.arraycopy(w4Array,0,encoded,i,w4);
 
-
             }
-            Path path = Paths.get("D:\\Users\\Alex\\IdeaProjects\\kriptolab\\out.enc");
-            Files.write(path,encoded, StandardOpenOption.APPEND);
+            outChannel.write(ByteBuffer.wrap(encoded));
             finishTime = System.currentTimeMillis();
 
         }
-        System.out.println("Encode: "+(finishTime-startTime)+" ms");
+        outChannel.close();
+        System.out.println("Encode: "+(finishTime-startTime)/1000+" s");
         return 0;
     }
 
@@ -219,9 +218,7 @@ public class rc5 {
         long newSize;
         if (size < 64000){
             if ((size % w4) != 0){
-                //System.out.println("size before "+ size);
                 newSize = size+ w4-(size%w4);
-                //System.out.println("size after "+ newSize);
             }
             else newSize = size;
             buffer = new byte[(int) newSize];
@@ -233,9 +230,8 @@ public class rc5 {
             bufferSize = 64000;
             decoded = new byte[64000];
         }
-        //System.out.println("size "+ newSize);
-        FileInputStream inputStream = new FileInputStream("D:\\Users\\Alex\\IdeaProjects\\kriptolab\\out.enc");
-        FileOutputStream outputStream = new FileOutputStream("D:\\Users\\Alex\\IdeaProjects\\kriptolab\\out.exe");
+        FileInputStream inputStream = new FileInputStream(inpFileName);
+        FileOutputStream outputStream = new FileOutputStream(outFileName);
         FileChannel outChannel = outputStream.getChannel();
         FileLock lock = outChannel.lock();
         long startTime = System.currentTimeMillis();
@@ -270,13 +266,12 @@ public class rc5 {
                 }
                 else {
                     System.arraycopy(w4Array,0,decoded,i,decoded.length-i);
-                }
-            }
+                }}
             outChannel.write(ByteBuffer.wrap(decoded));
             finishTime = System.currentTimeMillis();
         }
         outputStream.close();
-        System.out.println("Decode: "+(finishTime-startTime)+" ms");
+        System.out.println("Decode: "+(finishTime-startTime)/1000+" s");
         return 0;
     }
 }
