@@ -1,5 +1,7 @@
 plugins {
+    id 'application'
     id 'java'
+    id 'org.openjfx.javafxplugin' version '0.0.10'
 }
 
 group 'org.example'
@@ -9,9 +11,22 @@ repositories {
     mavenCentral()
 }
 
+sourceCompatibility = 16
 dependencies {
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
+    implementation group: 'org.openjfx', name: 'javafx-controls', version: '16'
+    // https://mvnrepository.com/artifact/org.openjfx/javafx-graphics
+    implementation group: 'org.openjfx', name: 'javafx-graphics', version: '16'
+    // https://mvnrepository.com/artifact/org.openjfx/javafx-base
+    implementation group: 'org.openjfx', name: 'javafx-base', version: '16'
+    // https://mvnrepository.com/artifact/org.openjfx/javafx-fxml
+    implementation group: 'org.openjfx', name: 'javafx-fxml', version: '16'
+
+
+}
+
+javafx {
+    version = '16'
+    modules = [ 'javafx.base','javafx.controls', 'javafx.fxml', 'javafx.graphics' ]
 }
 
 test {
