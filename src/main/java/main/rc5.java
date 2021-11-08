@@ -7,6 +7,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
+import java.util.Scanner;
 
 public class rc5 {
     public static int eof = 0;
@@ -35,6 +36,13 @@ public class rc5 {
         this.keyAlign();
         this.keyExtend();
         this.shuffle();
+    }
+    public void temporal() throws IOException {
+        size = Files.size(Paths.get("D:\\Users\\Alex\\IdeaProjects\\kriptolab\\inp.zip"));
+        sizeModW4 = (int) (size % w4);
+        Scanner in = new Scanner(System.in);
+        lastBlock = BigInteger.valueOf(in.nextLong()).toByteArray();
+        vector = Arrays.copyOf(lastBlock,w4);
     }
 
     long lshift(long val, long n) {
@@ -161,7 +169,7 @@ public class rc5 {
         return utils.byteSum(dataA,dataB);
     }
     int  encryptFile(String inpFileName,String outFileName) throws IOException {
-        size = Files.size(Paths.get("D:\\Users\\Alex\\IdeaProjects\\kriptolab\\inp.zip"));
+        size = Files.size(Paths.get(inpFileName));
         sizeModW4 = (int) (size % w4);
         lastBlock = utils.vector(w4);
         vector = Arrays.copyOf(lastBlock,w4);
@@ -185,7 +193,7 @@ public class rc5 {
             encoded = new byte[64000];
         }
         //System.out.println("size "+ size);
-        FileInputStream inputStream = new FileInputStream("D:\\Users\\Alex\\IdeaProjects\\kriptolab\\inp.zip");
+        FileInputStream inputStream = new FileInputStream(inpFileName);
         long startTime = System.currentTimeMillis();
         long finishTime = 0;
         byte[] w4Array;
@@ -204,7 +212,7 @@ public class rc5 {
                 inputStream.read(buffer, 0, bufferSize);
             }
             try {
-                File f = new File("D:\\Users\\Alex\\IdeaProjects\\kriptolab\\out.enc");
+                File f = new File(outFileName);
                 if (f.createNewFile()){
                     System.out.println("created");
                 }
@@ -215,7 +223,6 @@ public class rc5 {
             for (int i = 0; i < bufferSize + (bufferSize % w4); i += w4) {
                 //System.out.println("print "+ i);
                 w4Array =  utils.toW4Array(buffer,i,w4);
-
                 w4Array = utils.xor(w4Array,lastBlock);
                 w4Array = encryptBlock(w4Array);
                 lastBlock = Arrays.copyOf(w4Array,w4);
@@ -224,7 +231,7 @@ public class rc5 {
                 //System.out.println("Ok");
 
             }
-            Path path = Paths.get("D:\\Users\\Alex\\IdeaProjects\\kriptolab\\out.enc");
+            Path path = Paths.get(outFileName);
             Files.write(path,encoded, StandardOpenOption.APPEND);
             finishTime = System.currentTimeMillis();
 
@@ -261,6 +268,19 @@ public class rc5 {
         byte[] w4Array;
         byte[] tempArray;
         lastBlock = Arrays.copyOf(vector,w4);
+        try {
+            File f = new File("D:\\Users\\Alex\\IdeaProjects\\kriptolab\\out.zip");
+            if (f.createNewFile()){
+                System.out.println("created");
+            }
+            else{
+                f.delete();
+                f.createNewFile();
+            }
+        }
+        catch (Exception e){
+            System.out.println("already exists");
+        }
         while (inputStream.available() > 0) {
             decoded = new byte[decoded.length];
             if (inputStream.available() < bufferSize){
@@ -275,14 +295,7 @@ public class rc5 {
                 //noinspection ResultOfMethodCallIgnored
                 inputStream.read(buffer, 0, bufferSize);
             }
-            try {
-                File f = new File("D:\\Users\\Alex\\IdeaProjects\\kriptolab\\out.zip");
-                if (f.createNewFile()){
-                    System.out.println("created");
-                }}
-            catch (Exception e){
-                System.out.println("already exists");
-            }
+
             for (int i = 0; i < bufferSize; i += w4) {
                 //System.out.println("print "+ i);
                 eof = 0;

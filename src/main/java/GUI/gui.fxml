@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ButtonBar?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ProgressIndicator?>
+<?import javafx.scene.control.RadioButton?>
+<?import javafx.scene.control.ToggleGroup?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<AnchorPane nodeOrientation="LEFT_TO_RIGHT" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="GUI.Gui">
+   <children>
+      <ProgressIndicator layoutX="293.0" layoutY="180.0" progress="0.0">
+         <opaqueInsets>
+            <Insets />
+         </opaqueInsets></ProgressIndicator>
+      <Button layoutX="14.0" layoutY="35.0" mnemonicParsing="false" text="Button" AnchorPane.leftAnchor="20.0" AnchorPane.topAnchor="35.0" />
+      <Label contentDisplay="CENTER" layoutX="100.0" layoutY="37.0" prefHeight="26.0" prefWidth="163.0" text="Label" AnchorPane.leftAnchor="100.0" AnchorPane.rightAnchor="337.0" AnchorPane.topAnchor="35.0">
+         <opaqueInsets>
+            <Insets bottom="1.0" left="1.0" right="1.0" top="1.0" />
+         </opaqueInsets>
+      </Label>
+      <ButtonBar layoutX="182.0" layoutY="41.0" prefHeight="40.0" prefWidth="200.0">
+        <buttons>
+          <Button mnemonicParsing="false" text="Button" />
+        </buttons>
+      </ButtonBar>
+      <RadioButton layoutX="110.0" layoutY="124.0" mnemonicParsing="false" text="RadioButton">
+         <toggleGroup>
+            <ToggleGroup fx:id="tog1" />
+         </toggleGroup>
+      </RadioButton>
+      <RadioButton layoutX="110.0" layoutY="154.0" mnemonicParsing="false" text="RadioButton" toggleGroup="$tog1" />
+   </children>
+</AnchorPane>
