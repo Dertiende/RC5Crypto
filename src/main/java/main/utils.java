@@ -2,13 +2,11 @@ package main;
 
 import com.beust.jcommander.JCommander;
 
-import java.io.BufferedInputStream;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Random;
 import java.util.zip.CRC32;
@@ -33,14 +31,16 @@ public class utils {
 	public static byte[] vector(int w8) {
 		byte[] vector = new byte[w8];
 		new Random().nextBytes(vector);
-		System.out.println("vect" + Arrays.toString(vector));
-		BigInteger neV = new BigInteger(vector);
-		System.out.println("BtS: " + neV);
-		byte[] neB = neV.toByteArray();
-		System.out.println("StB: " + Arrays.toString(neB));
-
-
+//		System.out.println("vect" + Arrays.toString(vector));
+//		BigInteger neV = new BigInteger(vector);
+//		byte[] neB = neV.toByteArray();
+//		System.out.println("StB: " + Arrays.toString(neB));
 		return vector;
+	}
+
+	public static long byteToLong(byte[] b){
+		BigInteger big = new BigInteger(b);
+		return big.longValue();
 	}
 
 	public static byte[] fill(byte[] old, int size) {
@@ -109,7 +109,7 @@ public class utils {
 		return buf;
 	}
 
-	private static void cliParse(cliParser cli ,String[] args) {
+	private static void cliParse(rc5Obj cli , String[] args) {
 		JCommander jCommander =  JCommander.newBuilder()
 				.addObject(cli)
 				.build();
@@ -123,10 +123,11 @@ public class utils {
 
 	}
 
-
-	public static cliParser getCLI(String[] args){
-		cliParser cli = new cliParser();
+	public static rc5Obj getCLI(String[] args) throws IOException {
+		rc5Obj cli = new rc5Obj();
 		cliParse(cli,args);
+		cli.size = String.valueOf(Files.size(Paths.get(cli.input)));
+		cli.vector = new BigInteger(vector(Integer.parseInt(cli.bsize)/8)).toString();
 
 		return cli;
 	}
@@ -140,6 +141,16 @@ public class utils {
 			crc.update(cnt);
 		}
 		return crc.getValue();
+	}
+
+	public static void getDecodeInfo(rc5Obj cli,String path) throws IOException {
+		byte[] hash = new byte[4];
+		FileInputStream inputStream = new FileInputStream(path);
+		//noinspection ResultOfMethodCallIgnored
+		inputStream.read(hash,0,4);
+		inputStream.close();
+		cli.hash = String.valueOf(new BigInteger(hash).longValue());
+
 	}
 
 }

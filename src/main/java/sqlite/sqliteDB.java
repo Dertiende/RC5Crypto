@@ -1,5 +1,9 @@
 package sqlite;
-import javax.swing.plaf.nimbus.State;
+import main.rc5;
+import main.utils;
+import main.rc5Obj;
+
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
@@ -7,9 +11,11 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.sql.*;
 public class sqliteDB {
-	Connection c;
-	public sqliteDB() {
-		this.c = connect();
+	static rc5Obj cli;
+	static Connection c;
+	public sqliteDB(rc5Obj cli) {
+		c = connect();
+		sqliteDB.cli = cli;
 	}
 
 	private Connection connect(){
@@ -25,22 +31,45 @@ public class sqliteDB {
 		System.out.println("database connected");
 		return c;
 	}
-	private void createIfNoTable() throws SQLException {
+	private void createIfNoUserTable() throws SQLException {
 		String query = "CREATE TABLE IF NOT EXISTS users "+
 				"(name TEXT,pass TEXT)";
 		Statement statement = c.createStatement();
 		statement.executeUpdate(query);
 	}
+
+	private static void createIfNoRC5Table() throws SQLException {
+		String query = "CREATE TABLE IF NOT EXISTS RC5 "+
+           "(name TEXT, hash TEXT, key TEXT, rounds TEXT, blocksize TEXT, vector TEXT, size TEXT)";
+		Statement statement = c.createStatement();
+		statement.executeUpdate(query);
+	}
+
+	public static void addFileToDB(long vector) throws IOException, SQLException {
+		createIfNoRC5Table();
+		long hash = utils.getCRC32(cli.input);
+		String query = "INSERT INTO RC5 values(?,?,?,?,?,?,?)";
+		PreparedStatement statement = c.prepareStatement(query);
+		statement.setString(1,cli.login);
+		statement.setString(2, String.valueOf(hash));
+		statement.setString(3,cli.key);
+		statement.setString(4,cli.rounds);
+		statement.setString(5,cli.bsize);
+		statement.setString(6,String.valueOf(vector));
+		statement.setString(7, String.valueOf(rc5.size));
+		statement.executeUpdate();
+	}
+
 	public boolean isUserExist(String name) throws SQLException {
-		createIfNoTable();
+		createIfNoUserTable();
 		String query = "SELECT * FROM users WHERE name = ?";
 		PreparedStatement statement = c.prepareStatement(query);
 		statement.setString(1,name);
-		statement.execute();
-		ResultSet resultSet = statement.getResultSet();
-		return resultSet.getFetchSize() !=0;
+		ResultSet resultSet = statement.executeQuery();
+
+		return resultSet.next();
 	}
-	public boolean isPassCorrect(String name,String pass) throws SQLException, NoSuchAlgorithmException, UnsupportedEncodingException {
+	public boolean isPassCorrect(String name,String pass) throws SQLException, NoSuchAlgorithmException {
 		String query = "SELECT * FROM users WHERE pass = ? AND name = ?";
 		PreparedStatement statement = c.prepareStatement(query);
 		byte[] bytesOfMessage = pass.getBytes(StandardCharsets.UTF_8);
@@ -48,11 +77,25 @@ public class sqliteDB {
 		byte[] digest = md.digest(bytesOfMessage);
 		BigInteger bigInt = new BigInteger(1,digest);
 		String hashtext = bigInt.toString(16);
+		System.out.println("Hash: "+ hashtext);
 		statement.setString(1,hashtext);
 		statement.setString(2,name);
-		statement.execute();
-		ResultSet resultSet = statement.getResultSet();
-		return resultSet.getFetchSize() !=0;
+		ResultSet resultSet = statement.executeQuery();
+		return resultSet.next();
+	}
+	public static void getRC5Data(String hash) throws SQLException {
+		String query = "SELECT key,rounds,blocksize,vector,size FROM RC5 WHERE name = ? AND hash = ?";
+		PreparedStatement statement = c.prepareStatement(query);
+		statement.setString(1,cli.login);
+		statement.setString(2, hash);
+		ResultSet resultSet = statement.executeQuery();
+		resultSet.next();
+		cli.key = resultSet.getString("key");
+		cli.rounds = resultSet.getString("rounds");
+		cli.bsize = resultSet.getString("blocksize");
+		cli.vector = resultSet.getString("vector");
+		cli.size = resultSet.getString("size");
+
 	}
 	public void createUser(String name, String pass) throws NoSuchAlgorithmException, SQLException {
 		byte[] bytesOfMessage = pass.getBytes(StandardCharsets.UTF_8);

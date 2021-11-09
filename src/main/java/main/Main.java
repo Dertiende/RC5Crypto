@@ -1,36 +1,48 @@
 package main;
 
-import com.beust.jcommander.JCommander;
 import sqlite.sqliteDB;
 import java.io.IOException;
-import java.net.URISyntaxException;
+import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
-import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) throws IOException, SQLException, NoSuchAlgorithmException{
-
-        cliParser cli = utils.getCLI(args);
-        long crc = utils.getCRC32(cli.input);
-        sqliteDB db = new sqliteDB();
+        keyGenerator keyGen = new keyGenerator();
+        rc5Obj cli = utils.getCLI(args);
+        if (!keyGen.isPassRelevant(cli.pass)){
+            cli.pass = keyGen.getLab3Key();
+            System.out.println("Password too weak.\nPlease, write down new  generated strong password and use it next time: \n"+cli.pass);
+            Scanner in = new Scanner(System.in);
+            System.out.println("Print 'ok': ");
+            while (in.nextLine().compareToIgnoreCase("ok") !=0){
+                System.out.println("Wrong input. Print 'ok': ");
+            }
+        }
+        sqliteDB db = new sqliteDB(cli);
         if (db.isUserExist(cli.login)){
             if (db.isPassCorrect(cli.login,cli.pass)){
-                System.out.println("correct pass");
+                System.out.println("Successful authorisation.");
+            }
+            else{
+                System.out.println("User exists.Wrong password.");
+                System.exit(0);
             }
         }
         else{
             db.createUser(cli.login,cli.pass);
         }
-        System.out.println(Long.toHexString(crc));
-        rc5 rc5 = new rc5(Integer.parseInt(cli.bsize),Integer.parseInt(cli.rounds), cli.key.getBytes(StandardCharsets.UTF_8));
 
         if (cli.mode.compareToIgnoreCase("encrypt") == 0){
+            rc5 rc5 = new rc5(cli);
             rc5.encryptFile(cli.input,cli.output);
             }
         else {
-            rc5.temporal();
+            utils.getDecodeInfo(cli,cli.input);
+            sqliteDB.getRC5Data(cli.hash);
+            rc5 rc5 = new rc5(cli);
             rc5.decryptFile(cli.input,cli.output);
             }
 
