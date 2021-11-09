@@ -23,7 +23,6 @@ public class rc5 {
     Long  mod,mask;
     long[] L,S;
     byte[] key, keyAl,vector,lastBlock;
-    Long vec;
 
     public rc5(rc5Obj cli) {
         this.cli = cli;
@@ -38,8 +37,6 @@ public class rc5 {
         this.b = key.length;
         size = Long.parseLong(cli.size);
         sizeModW4 = (int) (size % w4);
-        vec = Long.parseLong(cli.vector);
-        String vecs = cli.vector;
         lastBlock = BigInteger.valueOf(Long.parseLong(cli.vector)).toByteArray();
         vector = Arrays.copyOf(lastBlock,w4);
         this.keyAlign();
@@ -245,16 +242,16 @@ public class rc5 {
         try {
             File f = new File(outFileName);
             if (f.createNewFile()){
-                System.out.println("created file");
+                System.out.println("Output file created");
             }
             else{
                 f.delete();
                 f.createNewFile();
-                System.out.println("created file");
+                System.out.println("Output file created");
             }
         }
         catch (Exception e){
-            System.out.println("already exists");
+            System.out.println("Output file already exists");
         }
     }
 
@@ -267,7 +264,7 @@ public class rc5 {
         FileInputStream inputStream = new FileInputStream(inpFileName);
         //noinspection ResultOfMethodCallIgnored
         inputStream.read(hash,0,4);
-        System.out.println("Read hash: "+ new BigInteger(hash));
+        //System.out.println("Read hash: "+ new BigInteger(hash));
         long startTime = System.currentTimeMillis();
         long finishTime = 0;
         byte[] w4Array;
@@ -283,7 +280,6 @@ public class rc5 {
                 decoded = new byte[bufferSize- sizeModW4];
                 //noinspection ResultOfMethodCallIgnored
                 inputStream.read(buffer, 0, bufferSize);
-                System.out.println("Buffer"+ Arrays.toString(buffer));
             }
             else {
                 //noinspection ResultOfMethodCallIgnored
