@@ -5,10 +5,6 @@ import sqlite.sqliteDB;
 import java.io.*;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
 import java.sql.SQLException;
 import java.util.Arrays;
 
@@ -33,7 +29,7 @@ public class rc5 {
 		this.mask = mod - 1;
 		this.b = key.length;
 		size = Long.parseLong(cli.size);
-		sizeModW4 = (int) (size % w4);
+		sizeModW4 = w4-(int) (size % w4);
 		lastBlock = BigInteger.valueOf(Long.parseLong(cli.vector)).toByteArray();
 		vector = Arrays.copyOf(lastBlock, w4);
 		this.keyAlign();
@@ -155,44 +151,32 @@ public class rc5 {
 	}
 
 	void encryptFile(String inpFileName, String outFileName) throws IOException, SQLException {
-		size = Files.size(Paths.get(inpFileName));
-		sizeModW4 = (int) (size % w4);
-		lastBlock = utils.vector(w4);
-		vector = Arrays.copyOf(lastBlock, w4);
 		int bufferSize;
 		byte[] buffer, encoded, w4Array, hash;
-		long newSize;
-		if (size < 64000) {
-			if ((size % w4) != 0) {
-				//System.out.println("size before "+ size);
-				newSize = size + w4 - (size % w4);
-				//System.out.println("size after "+ newSize);
-			} else newSize = size;
-			buffer = new byte[(int) newSize];
-			bufferSize = (int) newSize;
-			encoded = new byte[(int) newSize];
-		} else {
-			buffer = new byte[64000];
-			bufferSize = 64000;
-			encoded = new byte[64000];
-		}
-		//System.out.println("size "+ size);
+		buffer = new byte[64000];
+		bufferSize = 64000;
+		encoded = new byte[64000];
 		FileInputStream inputStream = new FileInputStream(inpFileName);
 		long startTime = System.currentTimeMillis();
 		long finishTime = 0;
 		createOutFile(outFileName);
-		Path path = Paths.get(outFileName);
+		FileOutputStream outputStream = new FileOutputStream(outFileName);
 		hash = BigInteger.valueOf(utils.getCRC32(inpFileName)).toByteArray();
-		Files.write(path, hash);
+		if (hash.length == 5){
+			byte[] tmp = hash.clone();
+			hash = new byte[4];
+			System.arraycopy(tmp,1,hash,0,4);
+		}
+		outputStream.write(hash);
 		while (inputStream.available() > 0) {
 			if (inputStream.available() < bufferSize) {
-				bufferSize = inputStream.available();
-				buffer = new byte[bufferSize + (bufferSize % w4)];
-				encoded = new byte[bufferSize + (bufferSize % w4)];
+				bufferSize = inputStream.available()+(w4-bufferSize % w4);
+				buffer = new byte[bufferSize + (w4-bufferSize % w4)];
+				encoded = new byte[bufferSize + (w4-bufferSize % w4)];
 			}
 			//noinspection ResultOfMethodCallIgnored
 			inputStream.read(buffer, 0, bufferSize);
-			for (int i = 0; i < bufferSize + (bufferSize % w4); i += w4) {
+			for (int i = 0; i < bufferSize ; i += w4) {
 				//System.out.println("print "+ i);
 				w4Array = utils.toW4Array(buffer, i, w4);
 				w4Array = utils.xor(w4Array, lastBlock);
@@ -200,10 +184,11 @@ public class rc5 {
 				lastBlock = Arrays.copyOf(w4Array, w4);
 				System.arraycopy(w4Array, 0, encoded, i, w4);
 			}
-			Files.write(path, encoded, StandardOpenOption.APPEND);
+			outputStream.write(encoded);
 			finishTime = System.currentTimeMillis();
 		}
 		inputStream.close();
+		outputStream.close();
 		System.out.println("Encode time: " + (int) ((finishTime - startTime) / 1000) + " sec");
 		sqliteDB.addFileToDB(utils.byteToLong(vector));
 	}
@@ -238,13 +223,13 @@ public class rc5 {
 		byte[] w4Array;
 		byte[] tempArray;
 		createOutFile(outFileName);
-
+		FileOutputStream outputStream = new FileOutputStream(outFileName);
 		while (inputStream.available() > 0) {
 			decoded = new byte[decoded.length];
 			if (inputStream.available() < bufferSize) {
 				bufferSize = inputStream.available();
-				buffer = new byte[bufferSize + (bufferSize % w4)];
-				decoded = new byte[bufferSize - sizeModW4];
+				buffer = new byte[bufferSize];
+				decoded = new byte[(int) (Long.parseLong(cli.size) % 64000)];
 			}
 			//noinspection ResultOfMethodCallIgnored
 			inputStream.read(buffer, 0, bufferSize);
@@ -259,13 +244,14 @@ public class rc5 {
 					System.arraycopy(w4Array, 0, decoded, i, w4);
 				} else {
 					System.arraycopy(w4Array, 0, decoded, i, decoded.length - i);
+					break;
 				}
 			}
-			Path path = Paths.get(outFileName);
-			Files.write(path, decoded, StandardOpenOption.APPEND);
+			outputStream.write(decoded);
 			finishTime = System.currentTimeMillis();
 		}
 		inputStream.close();
+		outputStream.close();
 		utils.isHashCorrect(utils.getCRC32(outFileName), Long.parseLong(cli.hash));
 		System.out.println("Decode time: " + (int) ((finishTime - startTime) / 1000) + " sec");
 	}

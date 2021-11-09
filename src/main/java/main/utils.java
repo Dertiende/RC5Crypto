@@ -4,7 +4,6 @@ import com.beust.jcommander.JCommander;
 
 import java.io.*;
 import java.math.BigInteger;
-import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
@@ -28,13 +27,9 @@ public class utils {
 		return xor;
 	}
 
-	public static byte[] vector(int w8) {
-		byte[] vector = new byte[w8];
+	public static byte[] vector(int w4) {
+		byte[] vector = new byte[w4];
 		new Random().nextBytes(vector);
-//		System.out.println("vect" + Arrays.toString(vector));
-//		BigInteger neV = new BigInteger(vector);
-//		byte[] neB = neV.toByteArray();
-//		System.out.println("StB: " + Arrays.toString(neB));
 		return vector;
 	}
 
@@ -43,27 +38,22 @@ public class utils {
 		return big.longValue();
 	}
 
-	public static byte[] fill(byte[] old, int size) {
-		byte[] newB = new byte[size];
-		System.arraycopy(old, 0, newB, 0, size);
-		return newB;
-	}
 
 	private static byte[] fillReversed(byte[] old, int w8) {
 		byte[] newB = new byte[w8];
-		for (int i = 0; i < old.length; i++) {
+		int i = 0;
+		while (i < old.length) {
 			newB[i + w8 - old.length] = old[i];
+			i++;
 		}
 		return newB;
 	}
 
 	public static byte[] reverse(BigInteger array, int w8) {
-		byte[] data = new byte[w8];
+		byte[] data;
 		if (array.toByteArray().length > w8) {
 			data = Arrays.copyOfRange(array.toByteArray(), 1, array.toByteArray().length);
 		} else {
-			int B = array.intValue();
-			byte[] newData = ByteBuffer.allocate(w8).putInt(B).array();
 			data = fillReversed(array.toByteArray(), w8);
 		}
 
@@ -95,18 +85,8 @@ public class utils {
 
 	public static byte[] toW4Array(byte[] data, int lust, int w4) {
 		byte[] w4Array = new byte[w4];
-		byte length = data[lust];
-
 		System.arraycopy(data, lust, w4Array, 0, w4);
 		return w4Array;
-	}
-
-	public static byte[] longToBytes(long x, int w8) {
-		ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);
-		buffer.putLong(x);
-		byte[] buf = new byte[w8];
-		System.arraycopy(buffer.array(), 4, buf, 0, w8);
-		return buf;
 	}
 
 	private static void cliParse(rc5Obj cli , String[] args) {
@@ -127,7 +107,7 @@ public class utils {
 		rc5Obj cli = new rc5Obj();
 		cliParse(cli,args);
 		cli.size = String.valueOf(Files.size(Paths.get(cli.input)));
-		cli.vector = new BigInteger(vector(Integer.parseInt(cli.bsize)/8)).toString();
+		cli.vector = new BigInteger(1,vector(Integer.parseInt(cli.bsize)/4)).toString();
 
 		return cli;
 	}
@@ -149,7 +129,8 @@ public class utils {
 		//noinspection ResultOfMethodCallIgnored
 		inputStream.read(hash,0,4);
 		inputStream.close();
-		cli.hash = String.valueOf(new BigInteger(hash).longValue());
+		cli.hash = String.valueOf(new BigInteger(1,hash).longValue());
+		int k = 0;
 
 	}
 	public static void isHashCorrect(long h1, long h2){

@@ -2,8 +2,6 @@ package main;
 
 import sqlite.sqliteDB;
 import java.io.IOException;
-import java.math.BigInteger;
-import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
 import java.util.Scanner;
@@ -34,7 +32,6 @@ public class Main {
         else{
             db.createUser(cli.login,cli.pass);
         }
-
         if (cli.mode.compareToIgnoreCase("encrypt") == 0){
             rc5 rc5 = new rc5(cli);
             rc5.encryptFile(cli.input,cli.output);
