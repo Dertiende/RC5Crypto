@@ -152,5 +152,12 @@ public class utils {
 		cli.hash = String.valueOf(new BigInteger(hash).longValue());
 
 	}
-
+	public static void isHashCorrect(long h1, long h2){
+		if (h1 == h2){
+			System.out.println("File integrity verified.");
+		}
+		else{
+			System.out.println("Integrity check fails.");
+		}
+	}
 }
