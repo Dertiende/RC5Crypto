@@ -1,14 +1,9 @@
 package main;
-import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 
-import java.net.URISyntaxException;
-import java.nio.file.Paths;
-import java.util.Objects;
+
 
 public class rc5Obj {
-	JCommander jCommander;
-	String[] argv;
     @Parameter(names = {"-l","--login"}, description = "Login")
     public String login;
     @Parameter(names = {"-p","--pass"}, description = "Password")
@@ -30,14 +25,5 @@ public class rc5Obj {
 	public String size;
 
 	public rc5Obj(){
-	}
-	public rc5Obj(String[] data){
-		key = data[0];
-		rounds = data[1];
-		bsize = data[2];
-		vector = data[3];
-		hash = data[4];
-		size = data[5];
-
 	}
 }
