@@ -28,7 +28,7 @@ public class sqliteDB {
 			System.err.println( e.getClass().getName() + ": " + e.getMessage() );
 			System.exit(0);
 		}
-		System.out.println("database connected");
+		System.out.println("Database connected.");
 		return c;
 	}
 	private void createIfNoUserTable() throws SQLException {
@@ -77,7 +77,7 @@ public class sqliteDB {
 		byte[] digest = md.digest(bytesOfMessage);
 		BigInteger bigInt = new BigInteger(1,digest);
 		String hashtext = bigInt.toString(16);
-		System.out.println("Hash: "+ hashtext);
+		//System.out.println("Hash: "+ hashtext);
 		statement.setString(1,hashtext);
 		statement.setString(2,name);
 		ResultSet resultSet = statement.executeQuery();
