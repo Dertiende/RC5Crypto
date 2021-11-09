@@ -1,48 +1,50 @@
 package main;
 
+import sqlite.sqliteDB;
+
 import java.io.*;
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Scanner;
+import sqlite.sqliteDB;
 
 public class rc5 {
+    rc5Obj cli;
     public static int eof = 0;
     public static int sizeModW4;
     public static long size = 0;
     int c, b,w,w4,w8,T,R;
     Long  mod,mask;
     long[] L,S;
-    byte[] key, keyAl;
-    byte[] vector;
-    byte[] lastBlock;
-    byte[] b1;
+    byte[] key, keyAl,vector,lastBlock;
+    Long vec;
 
-
-
-    public rc5(int w, int R, byte[] key) {
-        this.w = w;
-        this.R = R;
-        this.key = key;
+    public rc5(rc5Obj cli) {
+        this.cli = cli;
+        this.w = Integer.parseInt(cli.bsize);
+        this.R = Integer.parseInt(cli.rounds);
+        this.key = cli.key.getBytes(StandardCharsets.UTF_8);
         this.T = 2 * (R + 1);
         this.w4 = w / 4;
         this.w8 = w / 8;
         this.mod = utils.pow(2,w);
         this.mask = mod-1;
         this.b = key.length;
+        size = Long.parseLong(cli.size);
+        sizeModW4 = (int) (size % w4);
+        vec = Long.parseLong(cli.vector);
+        String vecs = cli.vector;
+        lastBlock = BigInteger.valueOf(Long.parseLong(cli.vector)).toByteArray();
+        vector = Arrays.copyOf(lastBlock,w4);
         this.keyAlign();
         this.keyExtend();
         this.shuffle();
-    }
-    public void temporal() throws IOException {
-        size = Files.size(Paths.get("D:\\Users\\Alex\\IdeaProjects\\kriptolab\\inp.zip"));
-        sizeModW4 = (int) (size % w4);
-        Scanner in = new Scanner(System.in);
-        lastBlock = BigInteger.valueOf(in.nextLong()).toByteArray();
-        vector = Arrays.copyOf(lastBlock,w4);
     }
 
     long lshift(long val, long n) {
@@ -168,13 +170,13 @@ public class rc5 {
         dataB = utils.reverse(B,w8);
         return utils.byteSum(dataA,dataB);
     }
-    int  encryptFile(String inpFileName,String outFileName) throws IOException {
+    int  encryptFile(String inpFileName,String outFileName) throws IOException, SQLException {
         size = Files.size(Paths.get(inpFileName));
         sizeModW4 = (int) (size % w4);
         lastBlock = utils.vector(w4);
         vector = Arrays.copyOf(lastBlock,w4);
         int bufferSize;
-        byte[] buffer, encoded;
+        byte[] buffer, encoded, w4Array, hash;
         long newSize;
         if (size < 64000){
             if ((size % w4) != 0){
@@ -196,8 +198,13 @@ public class rc5 {
         FileInputStream inputStream = new FileInputStream(inpFileName);
         long startTime = System.currentTimeMillis();
         long finishTime = 0;
-        byte[] w4Array;
 
+        createOutFile(outFileName);
+        Path path = Paths.get(outFileName);
+        hash = BigInteger.valueOf(utils.getCRC32(inpFileName)).toByteArray();
+        System.out.println("HashToFile: "+ Arrays.toString(hash));
+        System.out.println("Longhash: "+ utils.getCRC32(inpFileName));
+        Files.write(path,hash);
         while (inputStream.available() > 0) {
             if (inputStream.available() < bufferSize){
                 bufferSize = inputStream.available();
@@ -211,15 +218,7 @@ public class rc5 {
                 //noinspection ResultOfMethodCallIgnored
                 inputStream.read(buffer, 0, bufferSize);
             }
-            try {
-                File f = new File(outFileName);
-                if (f.createNewFile()){
-                    System.out.println("created");
-                }
-            }
-            catch (Exception e){
-                System.out.println("already exists");
-            }
+
             for (int i = 0; i < bufferSize + (bufferSize % w4); i += w4) {
                 //System.out.println("print "+ i);
                 w4Array =  utils.toW4Array(buffer,i,w4);
@@ -231,56 +230,51 @@ public class rc5 {
                 //System.out.println("Ok");
 
             }
-            Path path = Paths.get(outFileName);
+
             Files.write(path,encoded, StandardOpenOption.APPEND);
             finishTime = System.currentTimeMillis();
 
         }
+        inputStream.close();
         System.out.println("Encode: "+(finishTime-startTime)+" ms");
+        sqliteDB.addFileToDB(utils.byteToLong(vector));
         return 0;
     }
 
-    int  decryptFile(String inpFileName,String outFileName) throws IOException {
-        int bufferSize;
-        byte[] buffer, decoded;
-        long newSize;
-        ByteArrayOutputStream buf;
-        if (size < 64000){
-            if ((size % w4) != 0){
-                //System.out.println("size before "+ size);
-                newSize = size+ w4-(size%w4);
-                //System.out.println("size after "+ newSize);
-            }
-            else newSize = size;
-            buffer = new byte[(int) newSize];
-            bufferSize = (int) newSize;
-            decoded = new byte[(int) size];
-        }
-        else{
-            buffer = new byte[64000];
-            bufferSize = 64000;
-            decoded = new byte[64000];
-        }
-        //System.out.println("size "+ newSize);
-        FileInputStream inputStream = new FileInputStream("D:\\Users\\Alex\\IdeaProjects\\kriptolab\\out.enc");
-        long startTime = System.currentTimeMillis();
-        long finishTime = 0;
-        byte[] w4Array;
-        byte[] tempArray;
-        lastBlock = Arrays.copyOf(vector,w4);
+    private static void createOutFile(String outFileName) {
         try {
-            File f = new File("D:\\Users\\Alex\\IdeaProjects\\kriptolab\\out.zip");
+            File f = new File(outFileName);
             if (f.createNewFile()){
-                System.out.println("created");
+                System.out.println("created file");
             }
             else{
                 f.delete();
                 f.createNewFile();
+                System.out.println("created file");
             }
         }
         catch (Exception e){
             System.out.println("already exists");
         }
+    }
+
+    int  decryptFile(String inpFileName,String outFileName) throws IOException, SQLException {
+        int bufferSize;
+        byte[] buffer, decoded,hash = new byte[4];
+        buffer = new byte[64000];
+        bufferSize = 64000;
+        decoded = new byte[64000];
+        FileInputStream inputStream = new FileInputStream(inpFileName);
+        //noinspection ResultOfMethodCallIgnored
+        inputStream.read(hash,0,4);
+        System.out.println("Read hash: "+ new BigInteger(hash));
+        long startTime = System.currentTimeMillis();
+        long finishTime = 0;
+        byte[] w4Array;
+        byte[] tempArray;
+        lastBlock = Arrays.copyOf(vector,w4);
+        createOutFile(outFileName);
+
         while (inputStream.available() > 0) {
             decoded = new byte[decoded.length];
             if (inputStream.available() < bufferSize){
@@ -316,11 +310,12 @@ public class rc5 {
                 //System.out.println("Ok");
             }
             //System.out.println("dec "+ decoded.length + "size "+(size));
-            Path path = Paths.get("D:\\Users\\Alex\\IdeaProjects\\kriptolab\\out.zip");
+            Path path = Paths.get(outFileName);
             Files.write(path,decoded, StandardOpenOption.APPEND);
             finishTime = System.currentTimeMillis();
 
         }
+        inputStream.close();
         System.out.println("Decode: "+(finishTime-startTime)+" ms");
         return 0;
     }
