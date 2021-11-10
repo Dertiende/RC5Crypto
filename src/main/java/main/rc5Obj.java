@@ -16,7 +16,7 @@ public class rc5Obj {
 	public String key;
 	@Parameter(names = {"-r","--rounds"}, description = "Rounds number(1-255)")
 	public String rounds = "2";
-	@Parameter(names = {"-b","--bsize"}, description = "Block size(16,32,64)")
+	@Parameter(names = {"-b","--bsize"}, description = "Block size(16,32)")
 	public String bsize = "16";
 	@Parameter(names = {"-m","--mode"}, description = "Mode(encrypt,decrypt)")
 	public String mode;
@@ -39,13 +39,13 @@ public class rc5Obj {
 		}
 
 		try{
-			if (Integer.parseInt(bsize) != 16 && Integer.parseInt(bsize) != 32 && Integer.parseInt(bsize) != 64){
-				System.out.println("Incorrect block size number: "+ bsize+". Should be 16,32 or 64.");
+			if (Integer.parseInt(bsize) != 16 && Integer.parseInt(bsize) != 32){
+				System.out.println("Incorrect block size number: "+ bsize+". Should be 16 or 32.");
 				System.exit(0);
 			}
 		}
 		catch (IllegalArgumentException e){
-			System.out.println("Incorrect block size number: "+ bsize+". Should be 16,32 or 64.");
+			System.out.println("Incorrect block size number: "+ bsize+". Should be 16 or 32.");
 			System.exit(0);
 		}
 

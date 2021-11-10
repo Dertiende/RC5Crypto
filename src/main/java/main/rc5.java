@@ -26,7 +26,7 @@ public class rc5 {
 		this.T = 2 * (R + 1);
 		this.w4 = w / 4;
 		this.w8 = w / 8;
-		this.mod = utils.pow(2, w).longValue();
+		this.mod = utils.pow(2, w);
 		this.mask = mod - 1;
 		this.b = key.length;
 		size = Long.parseLong(cli.size);
