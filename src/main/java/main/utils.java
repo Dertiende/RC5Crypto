@@ -91,6 +91,8 @@ public class utils {
 				.build();
 		if (args.length == 0){
 			jCommander.usage();
+			System.out.println("Press Any Key To Continue...");
+			new java.util.Scanner(System.in).nextLine();
 			System.exit(0);
 		}
 		else{
@@ -125,10 +127,14 @@ public class utils {
 		//noinspection ResultOfMethodCallIgnored
 		inputStream.read(hash,0,4);
 		inputStream.close();
-		cli.hash = String.valueOf(Ints.fromByteArray(hash));
+		cli.hash = String.valueOf(fromBytes(hash[0],hash[1],hash[2],hash[3]));
 		int k = 0;
 
 	}
+	public static long fromBytes(byte b1, byte b2, byte b3, byte b4) {
+		return (b1 & 255L) << 24 | (b2 & 255L) << 16 | (b3 & 255L) << 8 | b4 & 255L;
+	}
+
 	public static void isHashCorrect(long h1, long h2){
 		if (h1 == h2){
 			System.out.println("File integrity verified.");

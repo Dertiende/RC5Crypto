@@ -11,13 +11,16 @@ public class Main {
         keyGenerator keyGen = new keyGenerator();
         rc5Obj cli = utils.getCLI(args);
         cli.isCLICorrect();
-        if (!keyGen.isPassRelevant(cli.pass)){
+        if (!keyGen.isPassRelevant(cli.login,cli.pass)){
             cli.pass = keyGen.getLab3Key();
             System.out.println("Password too weak.\nPlease, write down new  generated strong password and use it next time: \n"+cli.pass);
             Scanner in = new Scanner(System.in);
             System.out.println("Print 'ok': ");
-            while (in.nextLine().compareToIgnoreCase("ok") !=0){
+            String inp = in.nextLine();
+            while (inp.compareToIgnoreCase("ok") !=0 &&
+                   inp.compareToIgnoreCase("ок") !=0){
                 System.out.println("Wrong input. Print 'ok': ");
+                inp = in.nextLine();
             }
         }
         sqliteDB db = new sqliteDB(cli);
