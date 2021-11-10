@@ -22,7 +22,7 @@ public class keyGenerator {
 			                           "абвгдеёжзийклмнопрстуфхцчшщъыьэюя" +
 			                           "АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ" +
 			                           "0123456789" +
-			                           "+-=*/^$?!@#%&").toCharArray();
+			                           "+-=*/^?!@").toCharArray();
 
 	public keyGenerator() {
 
@@ -58,15 +58,19 @@ public class keyGenerator {
         return password.toString();
 	}
 
-	public boolean isPassRelevant(String pass){
+	public boolean isPassRelevant(String name,String pass){
 		int counter = 0;
+		int passIsName = 0;
+		for (char i: name.toCharArray()){
+			if (pass.contains(String.valueOf(i))) passIsName++;
+		}
 		counter += isContain(pass,lowercaseLatin);
 		counter += isContain(pass,uppercaseLatin);
 		counter += isContain(pass,lowercaseKirilic);
 		counter += isContain(pass,uppercaseKirilic);
 		counter += isContain(pass,numbers);
 		counter += isContain(pass,symbols);
-		if (pass.length() < 10) counter = 0;
+		if (pass.length() < 10 || passIsName == pass.length()) counter = 0;
 		return counter == 6;
 
 	}

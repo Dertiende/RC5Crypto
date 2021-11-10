@@ -6,7 +6,7 @@ import com.beust.jcommander.Parameter;
 public class rc5Obj {
     @Parameter(names = {"-l","--login"}, description = "Login")
     public String login;
-    @Parameter(names = {"-p","--pass"}, description = "Password")
+    @Parameter(names = {"-p","--pass"}, description = "Password. Must be 10+ symbols of Cyrillic,Latin and arithmetic operands. Mustn't consists only from login's characters.")
     public String pass;
     @Parameter(names = {"-i","--input"}, description = "Input file location")
 	public String input ;
