@@ -1,5 +1,6 @@
 package main;
 
+import com.google.common.primitives.Longs;
 import sqlite.sqliteDB;
 
 import java.io.*;
@@ -25,12 +26,12 @@ public class rc5 {
 		this.T = 2 * (R + 1);
 		this.w4 = w / 4;
 		this.w8 = w / 8;
-		this.mod = utils.pow(2, w);
+		this.mod = utils.pow(2, w).longValue();
 		this.mask = mod - 1;
 		this.b = key.length;
 		size = Long.parseLong(cli.size);
 		sizeModW4 = w4-(int) (size % w4);
-		lastBlock = BigInteger.valueOf(Long.parseLong(cli.vector)).toByteArray();
+		lastBlock = Longs.toByteArray(Long.parseLong(cli.vector));
 		vector = Arrays.copyOf(lastBlock, w4);
 		this.keyAlign();
 		this.keyExtend();
@@ -161,12 +162,10 @@ public class rc5 {
 		long finishTime = 0;
 		createOutFile(outFileName);
 		FileOutputStream outputStream = new FileOutputStream(outFileName);
-		hash = BigInteger.valueOf(utils.getCRC32(inpFileName)).toByteArray();
-		if (hash.length == 5){
-			byte[] tmp = hash.clone();
-			hash = new byte[4];
-			System.arraycopy(tmp,1,hash,0,4);
-		}
+		hash =  Longs.toByteArray(utils.getCRC32(inpFileName));
+		byte[] tmp = hash.clone();
+		hash = new byte[4];
+		System.arraycopy(tmp,4,hash,0,4);
 		outputStream.write(hash);
 		while (inputStream.available() > 0) {
 			if (inputStream.available() < bufferSize) {
@@ -190,7 +189,7 @@ public class rc5 {
 		inputStream.close();
 		outputStream.close();
 		System.out.println("Encode time: " + (int) ((finishTime - startTime) / 1000) + " sec");
-		sqliteDB.addFileToDB(utils.byteToLong(vector));
+		sqliteDB.addFileToDB(Longs.fromByteArray(vector));
 	}
 
 	private static void createOutFile(String outFileName) {
