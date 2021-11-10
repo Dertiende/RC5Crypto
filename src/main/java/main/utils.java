@@ -1,6 +1,8 @@
 package main;
 
 import com.beust.jcommander.JCommander;
+import com.google.common.primitives.Ints;
+import com.google.common.primitives.Longs;
 
 import java.io.*;
 import java.math.BigInteger;
@@ -32,12 +34,6 @@ public class utils {
 		new Random().nextBytes(vector);
 		return vector;
 	}
-
-	public static long byteToLong(byte[] b){
-		BigInteger big = new BigInteger(b);
-		return big.longValue();
-	}
-
 
 	private static byte[] fillReversed(byte[] old, int w8) {
 		byte[] newB = new byte[w8];
@@ -107,8 +103,8 @@ public class utils {
 		rc5Obj cli = new rc5Obj();
 		cliParse(cli,args);
 		cli.size = String.valueOf(Files.size(Paths.get(cli.input)));
-		cli.vector = new BigInteger(1,vector(Integer.parseInt(cli.bsize)/4)).toString();
-
+		byte[] vectorB = vector(Integer.parseInt(cli.bsize)/4);
+		cli.vector = String.valueOf(Longs.fromByteArray(vectorB));
 		return cli;
 	}
 
@@ -129,7 +125,7 @@ public class utils {
 		//noinspection ResultOfMethodCallIgnored
 		inputStream.read(hash,0,4);
 		inputStream.close();
-		cli.hash = String.valueOf(new BigInteger(1,hash).longValue());
+		cli.hash = String.valueOf(Ints.fromByteArray(hash));
 		int k = 0;
 
 	}

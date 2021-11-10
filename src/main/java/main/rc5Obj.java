@@ -26,4 +26,39 @@ public class rc5Obj {
 
 	public rc5Obj(){
 	}
+	public void isCLICorrect(){
+		try{
+			if (Integer.parseInt(rounds) < 1 || Integer.parseInt(rounds) > 255){
+				System.out.println("Incorrect rounds number: "+ rounds+". Should be 1-255.");
+				System.exit(0);
+			}
+		}
+		catch (IllegalArgumentException e){
+			System.out.println("Incorrect rounds number: "+ rounds+". Should be 1-255.");
+			System.exit(0);
+		}
+
+		try{
+			if (Integer.parseInt(bsize) != 16 && Integer.parseInt(bsize) != 32 && Integer.parseInt(bsize) != 64){
+				System.out.println("Incorrect block size number: "+ bsize+". Should be 16,32 or 64.");
+				System.exit(0);
+			}
+		}
+		catch (IllegalArgumentException e){
+			System.out.println("Incorrect block size number: "+ bsize+". Should be 16,32 or 64.");
+			System.exit(0);
+		}
+
+		try{
+			if (mode.compareToIgnoreCase("encrypt") !=0 && mode.compareToIgnoreCase("decrypt") !=0){
+				System.out.println("Incorrect mode: "+ mode+". Should be encrypt or decrypt.");
+				System.exit(0);
+			}
+		}
+		catch (IllegalArgumentException e){
+			System.out.println("Incorrect mode: "+ mode+". Should be encrypt or decrypt.");
+			System.exit(0);
+		}
+
+	}
 }

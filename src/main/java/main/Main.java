@@ -10,6 +10,7 @@ public class Main {
     public static void main(String[] args) throws IOException, SQLException, NoSuchAlgorithmException{
         keyGenerator keyGen = new keyGenerator();
         rc5Obj cli = utils.getCLI(args);
+        cli.isCLICorrect();
         if (!keyGen.isPassRelevant(cli.pass)){
             cli.pass = keyGen.getLab3Key();
             System.out.println("Password too weak.\nPlease, write down new  generated strong password and use it next time: \n"+cli.pass);

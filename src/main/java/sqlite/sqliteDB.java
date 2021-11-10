@@ -1,10 +1,10 @@
 package sqlite;
+import com.google.common.io.BaseEncoding;
 import main.rc5;
 import main.utils;
 import main.rc5Obj;
 
 import java.io.IOException;
-import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -44,9 +44,20 @@ public class sqliteDB {
 		statement.executeUpdate(query);
 	}
 
+	private static void deleteRowIfExists(String name, String hash) throws SQLException {
+		String query = "DELETE FROM RC5 WHERE name = ? AND hash = ?";
+		PreparedStatement statement = c.prepareStatement(query);
+		statement.setString(1, name);
+		statement.setString(2, hash);
+		if(statement.executeUpdate() !=0){
+			System.out.println("File encrypt data already exists and will be overwritten");
+		}
+	}
+
 	public static void addFileToDB(long vector) throws IOException, SQLException {
 		createIfNoRC5Table();
 		long hash = utils.getCRC32(cli.input);
+		deleteRowIfExists(cli.login,String.valueOf(hash));
 		String query = "INSERT INTO RC5 values(?,?,?,?,?,?,?)";
 		PreparedStatement statement = c.prepareStatement(query);
 		statement.setString(1,cli.login);
@@ -74,10 +85,8 @@ public class sqliteDB {
 		byte[] bytesOfMessage = pass.getBytes(StandardCharsets.UTF_8);
 		MessageDigest md = MessageDigest.getInstance("MD5");
 		byte[] digest = md.digest(bytesOfMessage);
-		BigInteger bigInt = new BigInteger(1,digest);
-		String hashtext = bigInt.toString(16);
-		//System.out.println("Hash: "+ hashtext);
-		statement.setString(1,hashtext);
+		String hash = BaseEncoding.base16().lowerCase().encode(digest);
+		statement.setString(1,hash);
 		statement.setString(2,name);
 		ResultSet resultSet = statement.executeQuery();
 		return resultSet.next();
@@ -100,12 +109,11 @@ public class sqliteDB {
 		byte[] bytesOfMessage = pass.getBytes(StandardCharsets.UTF_8);
 		MessageDigest md = MessageDigest.getInstance("MD5");
 		byte[] digest = md.digest(bytesOfMessage);
-		BigInteger bigInt = new BigInteger(1,digest);
-		String hashtext = bigInt.toString(16);
+		String hash = BaseEncoding.base16().lowerCase().encode(digest);
 		String query = "INSERT INTO users VALUES (?,?)";
 		PreparedStatement statement = c.prepareStatement(query);
 		statement.setString(1,name);
-		statement.setString(2,hashtext);
+		statement.setString(2,hash);
 		statement.executeUpdate();
 	}
 }

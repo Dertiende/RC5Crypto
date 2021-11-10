@@ -5,8 +5,6 @@ module kriptolab.main {
     requires java.desktop;
     requires java.sql;
     requires jcommander;
-
-
-    opens GUI;
+    requires com.google.common;
     exports main;
 }
