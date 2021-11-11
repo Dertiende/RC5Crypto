@@ -37,6 +37,7 @@ public class Main {
             db.createUser(cli.login,cli.pass);
         }
         if (cli.mode.compareToIgnoreCase("encrypt") == 0){
+            cli.key =  keyGen.getKey();
             rc5 rc5 = new rc5(cli);
             rc5.encryptFile(cli.input,cli.output);
             }

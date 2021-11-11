@@ -33,6 +33,7 @@ public class keyGenerator {
 		key.init(256);
 		secretKey = key.generateKey();
 		stringKey = Base64.getEncoder().encodeToString(secretKey.getEncoded());
+		stringKey = stringKey.substring(0,32);
 		return stringKey;
 	}
 
