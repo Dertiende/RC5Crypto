@@ -16,7 +16,7 @@ Usage: <main class> [options]
       Mode(encrypt,decrypt)
     -o, --output
       Output file location
-      Default: D:\Users\Alex\IdeaProjects\kriptotest
+      Default: D:\Users\Alex\IdeaProjects\kriptotest (current program folder)
   * -p, --pass
       Password. Must be 10+ symbols of Cyrillic,Latin and arithmetic operands. 
       Mustn't consists only from login's characters.
