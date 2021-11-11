@@ -2,6 +2,15 @@
 
 Текущая стадия: консольное приложение.
 
+Используемые библиотеки:
+    javafx.base;
+    javafx.controls;
+    javafx.fxml;
+    java.desktop;
+    java.sql;
+    jcommander;
+    com.google.common;
+
 ```
 Usage: <main class> [options]
   Options:
