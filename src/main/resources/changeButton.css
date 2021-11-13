@@ -1,0 +1,53 @@
+@font-face {
+    src: local("fonts/Roboto-Black.ttf");
+}
+@font-face {
+    src: local("fonts/Roboto-BlackItalic.ttf");
+}
+@font-face {
+    src: local("fonts/Roboto-Bold.ttf");
+}
+@font-face {
+    font-family: "Roboto Bold Italic";
+    src: local("fonts/Roboto-BoldItalic.ttf");
+}
+@font-face {
+    src: local("fonts/Roboto-Italic.ttf");
+}
+@font-face {
+    src: local("fonts/Roboto-Light.ttf");
+}
+@font-face {
+    src: local("fonts/Roboto-LightItalic.ttf");
+}
+@font-face {
+    src: local("fonts/Roboto-Medium.ttf");
+}
+@font-face {
+    font-family: "Roboto Medium Italic";
+    src: local("fonts/Roboto-MediumItalic.ttf");
+}
+@font-face {
+    src: local("fonts/Roboto-Regular.ttf");
+}
+@font-face {
+    src: local("fonts/Roboto-Thin.ttf");
+}
+@font-face {
+    src: local("fonts/Roboto-ThinItalic.ttf");
+}
+.changeButton {
+    -fx-background-color: #20cc60;
+    -fx-border-color: #E77C05;
+    -fx-border-radius: 5;
+    -fx-font-family: "Verdana";
+    -fx-font-size: 18;
+}
+
+.changeButton:selected {
+    -fx-background-color: #20cc60;
+    -fx-border-color: #006CAD;
+    -fx-border-radius: 5;
+    -fx-font-family: "Verdana";
+    -fx-font-size: 18;
+}

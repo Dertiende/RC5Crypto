@@ -1,4 +1,4 @@
-module kriptolab.main {
+module kriptotest{
     requires javafx.base;
     requires javafx.controls;
     requires javafx.fxml;
@@ -7,4 +7,7 @@ module kriptolab.main {
     requires jcommander;
     requires com.google.common;
     exports main;
+    exports GUI;
+    exports GUI.controllers;
+    opens GUI.controllers to javafx.fxml;
 }

@@ -2,6 +2,14 @@
 
 Текущая стадия: консольное приложение.
 
+* javafx.base;
+* javafx.controls;
+* javafx.fxml;
+* java.desktop;
+* java.sql;
+* jcommander;
+* com.google.common;
+
 ```
 Usage: <main class> [options]
   Options:
@@ -16,7 +24,7 @@ Usage: <main class> [options]
       Mode(encrypt,decrypt)
     -o, --output
       Output file location
-      Default: D:\Users\Alex\IdeaProjects\kriptotest
+      Default: D:\Users\Alex\IdeaProjects\kripto (program folder)
   * -p, --pass
       Password. Must be 10+ symbols of Cyrillic,Latin and arithmetic operands. 
       Mustn't consists only from login's characters.

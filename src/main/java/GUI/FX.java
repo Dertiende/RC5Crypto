@@ -1,52 +1,49 @@
 package GUI;
 
 import javafx.application.Application;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
-import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
 
 public class FX extends Application {
     public static void main(String[] args) {
-        Application.launch();
+        System.setProperty("prism.allowhidpi", "false");
+        launch(args);
     }
     private final Desktop desktop = Desktop.getDesktop();
-    @Override
-    public void start(final Stage primaryStage) throws Exception {
+    public void start(Stage primaryStage) throws Exception {
+        System.out.println(getClass().getResource("/fxml/authorization.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/authorization.fxml"));
+        Parent root = loader.load();
         primaryStage.setTitle("RC5Kripto");
-        primaryStage.setWidth(500);
-        primaryStage.setHeight(800);
+        primaryStage.setScene(new Scene(root,400,350));
         Button openBtn = new Button("Select file");
         final FileChooser fileChooser = new FileChooser();
         final TextField inp = new TextField();
-        VBox root = new VBox();
-        root.setSpacing(5);
-
-        root.getChildren().addAll(inp, openBtn);
-        Scene scene = new Scene(root, 400, 200);
-        EventHandler<ActionEvent> event = new EventHandler<ActionEvent>() {
-                    public void handle(ActionEvent e)
-                    {
-                        // get the file selected
-                        File file = fileChooser.showOpenDialog(primaryStage);
-                        if (file != null) {
-                            inp.setText(file.getAbsolutePath());
-                        }
-                    }
-                };
-        openBtn.setOnAction(event);
-        primaryStage.setScene(scene);
+//        VBox root = new VBox();
+//        root.setSpacing(5);
+//
+//        root.getChildren().addAll(inp, openBtn);
+//        EventHandler<ActionEvent> event = new EventHandler<ActionEvent>() {
+//                    public void handle(ActionEvent e)
+//                    {
+//                        // get the file selected
+//                        File file = fileChooser.showOpenDialog(primaryStage);
+//                        if (file != null) {
+//                            inp.setText(file.getAbsolutePath());
+//                        }
+//                    }
+//                };
+//       openBtn.setOnAction(event);
+        primaryStage.setResizable(false);
         primaryStage.show();
     }
 

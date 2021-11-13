@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.shape.*?>
+<?import javafx.scene.paint.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.transform.*?>
+<?import javafx.scene.effect.*?>
+
+<Group id='_root' xmlns:fx="http://javafx.com/fxml" xmlns:fxsvg="http://efxclipse.org/fxml-svg">
+	<children>
+		<Group
+			opacity="1.0"
+			id="Layer_2"
+			>
+			<children>
+				<Group
+					opacity="1.0"
+					id="XMLID_00000132080338557131155700000012060542158136863628_"
+					>
+					<children>
+						<Group
+							opacity="1.0"
+							id="XMLID_00000012474527937573070760000001503995657527427754_"
+							>
+							<children>
+								<Group
+									opacity="1.0"
+									id="XMLID_00000020393855181732007630000007590835314471239332_"
+									>
+									<children>
+										<Polygon
+											points="98.62,230.75,388.83,57.67,399.32,136.34,"
+											opacity="1"
+											id="XMLID_00000054241106855472940370000015484268543178441148_"
+										>
+										<styleClass>
+											<String fx:value="st11"/>
+										</styleClass>
+										
+										</Polygon>
+										<Polygon
+											points="398.82,147.31,405.04,485.15,331.53,455.22,"
+											opacity="1"
+											id="XMLID_00000088132955212300536530000016963160121604174992_"
+										>
+										<styleClass>
+											<String fx:value="st11"/>
+										</styleClass>
+										
+										</Polygon>
+										<Polygon
+											points="322.93,446.6,26.49,284.42,88.95,235.45,"
+											opacity="1"
+											id="XMLID_00000000212414673334660030000016797345808974032561_"
+										>
+										<styleClass>
+											<String fx:value="st11"/>
+										</styleClass>
+										
+										</Polygon>
+									</children>
+								</Group>
+								<Group
+									opacity="1.0"
+									id="XMLID_00000156565872832962818860000010736054829436532127_"
+									>
+									<children>
+										<Polygon
+											points="240.09,161.23,438.33,266.79,397.19,299.8,"
+											opacity="1"
+											id="XMLID_00000150817368319697311870000008302853043083962524_"
+										>
+										<styleClass>
+											<String fx:value="st12"/>
+										</styleClass>
+										
+										</Polygon>
+										<Polygon
+											points="390.78,303.29,200.75,423,192.51,370.89,"
+											opacity="1"
+											id="XMLID_00000033346731461452462540000004564019145815601032_"
+										>
+										<styleClass>
+											<String fx:value="st12"/>
+										</styleClass>
+										
+										</Polygon>
+										<Polygon
+											points="194.45,363.04,184.76,138.66,234.09,157.35,"
+											opacity="1"
+											id="XMLID_00000181795528439801973740000005197613454943679371_"
+										>
+										<styleClass>
+											<String fx:value="st12"/>
+										</styleClass>
+										
+										</Polygon>
+									</children>
+								</Group>
+							</children>
+						</Group>
+					</children>
+				</Group>
+			</children>
+		</Group>
+	</children>
+</Group>

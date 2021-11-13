@@ -11,7 +11,7 @@ public class rc5Obj {
     @Parameter(names = {"-i","--input"}, required = true,description = "Input file location")
 	public String input ;
 	@Parameter(names = {"-o","--output"}, description = "Output file location")
-	public String output = System.getProperty("user.dir");
+	public String output = System.getProperty("user.dir")+"\\out.enc";
 	public String key;
 	@Parameter(names = {"-r","--rounds"}, description = "Rounds number(1-255)")
 	public String rounds = "2";
