@@ -88,25 +88,15 @@ public class Encryption {
 				e.printStackTrace();
 			}
 		});
-		changeModeButton.setOnAction(actionEvent -> {
-			changeMode();
-		});
-		inputFileField.setOnAction(actionEvent -> {
-			isInputFileCorrect(inputFileField.getText());
-		});
+		changeModeButton.setOnAction(actionEvent -> changeMode());
+		inputFileField.setOnAction(actionEvent -> isInputFileCorrect(inputFileField.getText()));
 		inputFileButton.setOnAction(actionEvent -> {
 			selectInputFile();
 			isInputFileCorrect(inputFileField.getText());
 		});
-		inputFileField.textProperty().addListener((observableValue, s, t1) -> {
-			isInputFileCorrect(t1);
-		});
-		outputFileField.textProperty().addListener((observableValue, s, t1) -> {
-			isOutputFileCorrect(t1);
-		});
-		outputFileField.setOnAction(actionEvent -> {
-			isOutputFileCorrect(outputFileField.getText());
-		});
+		inputFileField.textProperty().addListener((observableValue, s, t1) -> isInputFileCorrect(t1));
+		outputFileField.textProperty().addListener((observableValue, s, t1) -> isOutputFileCorrect(t1));
+		outputFileField.setOnAction(actionEvent -> isOutputFileCorrect(outputFileField.getText()));
 		outputFileButton.setOnAction(actionEvent -> {
 			selectOutFile();
 			isOutputFileCorrect(outputFileField.getText());
@@ -158,6 +148,7 @@ public class Encryption {
 				obj.key =  keyGen.getKey();
 				rc5.getEncryption(this);
 				utils.getEncryption(this);
+				sqliteDB.getEncryption(this);
 				rc5 rc5 = new rc5(obj);
 				Runnable r = ()->{
 
@@ -180,6 +171,7 @@ public class Encryption {
 
 				utils.getDecodeInfo(obj,obj.input);
 				sqliteDB.getRC5Data(obj.hash);
+				sqliteDB.getEncryption(this);
 				rc5.getEncryption(this);
 				utils.getEncryption(this);
 				rc5 rc5 = new rc5(obj);
