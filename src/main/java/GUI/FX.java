@@ -6,6 +6,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
@@ -20,10 +21,9 @@ public class FX extends Application {
     }
     private final Desktop desktop = Desktop.getDesktop();
     public void start(Stage primaryStage) throws Exception {
-        System.out.println(getClass().getResource("/fxml/authorization.fxml"));
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/authorization.fxml"));
         Parent root = loader.load();
-        primaryStage.setTitle("RC5Kripto");
+        primaryStage.setTitle("RC5Crypto");
         primaryStage.setScene(new Scene(root,400,350));
         Button openBtn = new Button("Select file");
         final FileChooser fileChooser = new FileChooser();
@@ -43,6 +43,7 @@ public class FX extends Application {
 //                    }
 //                };
 //       openBtn.setOnAction(event);
+        primaryStage.getIcons().add(new Image("vec1.png"));
         primaryStage.setResizable(false);
         primaryStage.show();
     }

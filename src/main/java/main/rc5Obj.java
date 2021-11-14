@@ -25,6 +25,7 @@ public class rc5Obj {
 
 	public rc5Obj(){
 	}
+
 	public void isCLICorrect(){
 		try{
 			if (Integer.parseInt(rounds) < 1 || Integer.parseInt(rounds) > 255){

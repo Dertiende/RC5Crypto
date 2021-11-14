@@ -12,8 +12,7 @@ public class Main {
         rc5Obj cli = utils.getCLI(args);
         cli.isCLICorrect();
         if (!keyGen.isPassRelevant(cli.login,cli.pass)){
-            cli.pass = keyGen.getLab3Key();
-            System.out.println("Password too weak.\nPlease, write down new  generated strong password and use it next time: \n"+cli.pass);
+            System.out.println("Password too weak.\nPlease, write down new generated strong password and use it next time: \n"+cli.pass);
             Scanner in = new Scanner(System.in);
             System.out.println("Print 'ok': ");
             String inp = in.nextLine();

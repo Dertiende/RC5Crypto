@@ -7,6 +7,7 @@ module kriptotest{
     requires jcommander;
     requires com.google.common;
     exports main;
+    exports sqlite;
     exports GUI;
     exports GUI.controllers;
     opens GUI.controllers to javafx.fxml;

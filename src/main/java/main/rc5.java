@@ -1,5 +1,6 @@
 package main;
 
+import GUI.controllers.Encryption;
 import com.google.common.primitives.Longs;
 import sqlite.sqliteDB;
 
@@ -10,6 +11,7 @@ import java.sql.SQLException;
 import java.util.Arrays;
 
 public class rc5 {
+	static Encryption encryption;
 	rc5Obj cli;
 	public static int sizeModW4;
 	public static long size = 0;
@@ -103,6 +105,9 @@ public class rc5 {
 		}
 	}
 
+	public static void getEncryption(Encryption encryption) {
+		rc5.encryption = encryption;
+	}
 
 	byte[] encryptBlock(byte[] data) {
 		byte[] dataA = new byte[w8];
@@ -151,7 +156,7 @@ public class rc5 {
 		return utils.byteSum(dataA, dataB);
 	}
 
-	void encryptFile(String inpFileName, String outFileName) throws IOException, SQLException {
+	public void encryptFile(String inpFileName, String outFileName) throws IOException, SQLException {
 		int bufferSize;
 		byte[] buffer, encoded, w4Array, hash;
 		buffer = new byte[64000];
@@ -188,8 +193,15 @@ public class rc5 {
 		}
 		inputStream.close();
 		outputStream.close();
-		System.out.println("Encode time: " + (int) ((finishTime - startTime) / 1000) + " sec");
-		sqliteDB.addFileToDB(Longs.fromByteArray(vector));
+		encryption.print("Encode time: " + (int) ((finishTime - startTime) / 1000) + " sec");
+		//System.out.println("Encode time: " + (int) ((finishTime - startTime) / 1000) + " sec");
+		if (vector.length<8){
+			sqliteDB.addFileToDB(utils.fromBytes(vector[0],vector[1],vector[2],vector[3]));
+		}
+		else{
+			sqliteDB.addFileToDB(Longs.fromByteArray(vector));
+		}
+
 	}
 
 	private static void createOutFile(String outFileName) {
@@ -201,13 +213,14 @@ public class rc5 {
 				//noinspection ResultOfMethodCallIgnored
 				f.createNewFile();
 			}
-			System.out.println("Output file created");
+			//System.out.println("Output file created");
+			encryption.print("Output file created");
 		} catch (Exception e) {
 			System.out.println("Output file already exists");
 		}
 	}
 
-	void decryptFile(String inpFileName, String outFileName) throws IOException {
+	public void decryptFile(String inpFileName, String outFileName) throws IOException {
 		int bufferSize;
 		byte[] buffer, decoded, hash = new byte[4];
 		buffer = new byte[64000];
@@ -252,6 +265,7 @@ public class rc5 {
 		inputStream.close();
 		outputStream.close();
 		utils.isHashCorrect(utils.getCRC32(outFileName), Long.parseLong(cli.hash));
-		System.out.println("Decode time: " + (int) ((finishTime - startTime) / 1000) + " sec");
+		encryption.print("Decode time: " + (int) ((finishTime - startTime) / 1000) + " sec");
+		//System.out.println("Decode time: " + (int) ((finishTime - startTime) / 1000) + " sec");
 	}
 }

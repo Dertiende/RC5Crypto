@@ -13,7 +13,7 @@
 <?import javafx.scene.shape.Polygon?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane prefHeight="400.0" prefWidth="700.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="GUI.controllers.Encryption">
+<AnchorPane focusTraversable="true" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" nodeOrientation="LEFT_TO_RIGHT" prefHeight="400.0" prefWidth="700.0" style="-fx-background-color: #fafafa; -fx-border-color: #20cc60; -fx-border-width: 2;" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="GUI.controllers.Encryption">
    <children>
       <AnchorPane prefHeight="60.0" prefWidth="700.0" style="-fx-background-color: #20cc60;">
          <children>
@@ -27,7 +27,7 @@
                   <Polygon id="XMLID_00000000212414673334660030000016797345808974032561_" layoutX="252.0" layoutY="67.0" opacity="1" points="56.0, 288.85003662109375, 26.49, 284.42, 31.0, 277.35003662109375" rotate="133.0" style="-fx-fill: #006CAD;" styleClass="st11" translateX="-0.3" />
                </children>
             </Group>
-            <Label layoutX="82.0" layoutY="8.0" text="RC5Kripto">
+            <Label layoutX="82.0" layoutY="8.0" text="RC5Crypto">
                <font>
                   <Font name="MV Boli" size="24.0" />
                </font>
@@ -103,7 +103,7 @@
       <TextArea fx:id="logField" editable="false" layoutX="50.0" layoutY="266.0" prefHeight="120.0" prefWidth="600.0" />
       <Button fx:id="startButton" alignment="CENTER" layoutX="290.0" layoutY="200.0" maxHeight="40.0" maxWidth="120.0" minHeight="40.0" minWidth="120.0" mnemonicParsing="false" prefHeight="40.0" prefWidth="120.0" text="Start" textAlignment="CENTER">
          <font>
-            <Font size="20.0" />
+            <Font name="Calibri Bold" size="20.0" />
          </font>
       </Button>
    </children>

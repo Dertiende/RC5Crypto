@@ -1,5 +1,6 @@
 package main;
 
+import GUI.controllers.Encryption;
 import com.beust.jcommander.JCommander;
 import com.google.common.primitives.Ints;
 import com.google.common.primitives.Longs;
@@ -14,6 +15,7 @@ import java.util.zip.CRC32;
 
 
 public class utils {
+	static Encryption encryption;
 	public static long pow(int a, int b) {
 		long pow = 1;
 		for (int i = 0; i < b; i++) pow *= a;
@@ -33,6 +35,10 @@ public class utils {
 		byte[] vector = new byte[w4];
 		new Random().nextBytes(vector);
 		return vector;
+	}
+
+	public static void getEncryption(Encryption encryption) {
+		utils.encryption = encryption;
 	}
 
 	private static byte[] fillReversed(byte[] old, int w8) {
@@ -137,10 +143,12 @@ public class utils {
 
 	public static void isHashCorrect(long h1, long h2){
 		if (h1 == h2){
-			System.out.println("File integrity verified.");
+			encryption.print("File integrity verified");
+			//System.out.println("File integrity verified.");
 		}
 		else{
-			System.out.println("Integrity check fails.");
+			encryption.print("Integrity check fails");
+			//System.out.println("Integrity check fails.");
 		}
 	}
 }

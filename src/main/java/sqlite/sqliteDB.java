@@ -1,4 +1,5 @@
 package sqlite;
+import GUI.controllers.Encryption;
 import com.google.common.io.BaseEncoding;
 import main.rc5;
 import main.utils;
@@ -10,6 +11,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.sql.*;
 public class sqliteDB {
+	static Encryption encryption;
 	static rc5Obj cli;
 	static Connection c;
 	public sqliteDB(rc5Obj cli) {
@@ -27,7 +29,7 @@ public class sqliteDB {
 			System.err.println( e.getClass().getName() + ": " + e.getMessage() );
 			System.exit(0);
 		}
-		System.out.println("Database connected.");
+		//System.out.println("Database connected.");
 		return c;
 	}
 	private void createIfNoUserTable() throws SQLException {
@@ -44,13 +46,18 @@ public class sqliteDB {
 		statement.executeUpdate(query);
 	}
 
+	public static void getEncryption(Encryption encryption) {
+		sqliteDB.encryption = encryption;
+	}
+
 	private static void deleteRowIfExists(String name, String hash) throws SQLException {
 		String query = "DELETE FROM RC5 WHERE name = ? AND hash = ?";
 		PreparedStatement statement = c.prepareStatement(query);
 		statement.setString(1, name);
 		statement.setString(2, hash);
 		if(statement.executeUpdate() !=0){
-			System.out.println("File encrypt data already exists and will be overwritten");
+			encryption.print("File encrypt data already exists and will be overwritten");
+			// System.out.println("File encrypt data already exists and will be overwritten");
 		}
 	}
 
