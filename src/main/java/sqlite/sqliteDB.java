@@ -1,9 +1,9 @@
 package sqlite;
 import GUI.controllers.Encryption;
-import com.google.common.io.BaseEncoding;
 import main.rc5;
 import main.utils;
 import main.rc5Obj;
+import jakarta.xml.bind.DatatypeConverter;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -92,7 +92,7 @@ public class sqliteDB {
 		byte[] bytesOfMessage = pass.getBytes(StandardCharsets.UTF_8);
 		MessageDigest md = MessageDigest.getInstance("MD5");
 		byte[] digest = md.digest(bytesOfMessage);
-		String hash = BaseEncoding.base16().lowerCase().encode(digest);
+		String hash = DatatypeConverter.printHexBinary(digest);
 		statement.setString(1,hash);
 		statement.setString(2,name);
 		ResultSet resultSet = statement.executeQuery();
@@ -116,7 +116,7 @@ public class sqliteDB {
 		byte[] bytesOfMessage = pass.getBytes(StandardCharsets.UTF_8);
 		MessageDigest md = MessageDigest.getInstance("MD5");
 		byte[] digest = md.digest(bytesOfMessage);
-		String hash = BaseEncoding.base16().lowerCase().encode(digest);
+		String hash = DatatypeConverter.printHexBinary(digest);
 		String query = "INSERT INTO users VALUES (?,?)";
 		PreparedStatement statement = c.prepareStatement(query);
 		statement.setString(1,name);

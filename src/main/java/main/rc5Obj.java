@@ -1,23 +1,23 @@
 package main;
-import com.beust.jcommander.Parameter;
+//import com.beust.jcommander.Parameter;
 
 
 
 public class rc5Obj {
-    @Parameter(names = {"-l","--login"}, required = true, description = "Login")
+    //@Parameter(names = {"-l","--login"}, required = true, description = "Login")
     public String login;
-    @Parameter(names = {"-p","--pass"}, required = true, description = "Password. Must be 10+ symbols of Cyrillic,Latin and arithmetic operands. Mustn't consists only from login's characters.")
+    //@Parameter(names = {"-p","--pass"}, required = true, description = "Password. Must be 10+ symbols of Cyrillic,Latin and arithmetic operands. Mustn't consists only from login's characters.")
     public String pass;
-    @Parameter(names = {"-i","--input"}, required = true,description = "Input file location")
+    //@Parameter(names = {"-i","--input"}, required = true,description = "Input file location")
 	public String input ;
-	@Parameter(names = {"-o","--output"}, description = "Output file location")
+	//@Parameter(names = {"-o","--output"}, description = "Output file location")
 	public String output = System.getProperty("user.dir")+"\\out.enc";
 	public String key;
-	@Parameter(names = {"-r","--rounds"}, description = "Rounds number(1-255)")
+	//@Parameter(names = {"-r","--rounds"}, description = "Rounds number(1-255)")
 	public String rounds = "2";
-	@Parameter(names = {"-b","--bsize"}, description = "Block size(16,32)")
+	//@Parameter(names = {"-b","--bsize"}, description = "Block size(16,32)")
 	public String bsize = "16";
-	@Parameter(names = {"-m","--mode"}, required = true,description = "Mode(encrypt,decrypt)")
+	//@Parameter(names = {"-m","--mode"}, required = true,description = "Mode(encrypt,decrypt)")
 	public String mode;
 	public String vector;
 	public String hash;

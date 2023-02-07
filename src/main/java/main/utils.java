@@ -1,10 +1,7 @@
 package main;
 
 import GUI.controllers.Encryption;
-import com.beust.jcommander.JCommander;
-import com.google.common.primitives.Ints;
-import com.google.common.primitives.Longs;
-
+//import com.beust.jcommander.JCommander;
 import java.io.*;
 import java.math.BigInteger;
 import java.nio.file.Files;
@@ -91,25 +88,25 @@ public class utils {
 		return w4Array;
 	}
 
-	private static void cliParse(rc5Obj cli , String[] args) {
-		JCommander jCommander =  JCommander.newBuilder()
-				.addObject(cli)
-				.build();
-		if (args.length == 0){
-			jCommander.usage();
-			System.out.println("Press Any Key To Continue...");
-			new java.util.Scanner(System.in).nextLine();
-			System.exit(0);
-		}
-		else{
-			jCommander.parse(args);
-		}
-
-	}
+//	private static void cliParse(rc5Obj cli , String[] args) {
+//		JCommander jCommander =  JCommander.newBuilder()
+//				.addObject(cli)
+//				.build();
+//		if (args.length == 0){
+//			jCommander.usage();
+//			System.out.println("Press Any Key To Continue...");
+//			new java.util.Scanner(System.in).nextLine();
+//			System.exit(0);
+//		}
+//		else{
+//			jCommander.parse(args);
+//		}
+//
+//	}
 
 	public static rc5Obj getCLI(String[] args) throws IOException {
 		rc5Obj cli = new rc5Obj();
-		cliParse(cli,args);
+		//cliParse(cli,args);
 		cli.size = String.valueOf(Files.size(Paths.get(cli.input)));
 		byte[] vectorB = vector(Integer.parseInt(cli.bsize)/4);
 		cli.vector = String.valueOf(Longs.fromByteArray(vectorB));
@@ -149,6 +146,15 @@ public class utils {
 		else{
 			encryption.print("Integrity check fails");
 			//System.out.println("Integrity check fails.");
+		}
+	}
+
+	public static class subscriberDTO{
+		public String name;
+		public Long value;
+		subscriberDTO(String name, Long value){
+			this.name = name;
+			this.value = value;
 		}
 	}
 }

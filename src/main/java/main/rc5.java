@@ -1,7 +1,6 @@
 package main;
 
 import GUI.controllers.Encryption;
-import com.google.common.primitives.Longs;
 import sqlite.sqliteDB;
 
 import java.io.*;
@@ -19,8 +18,26 @@ public class rc5 {
 	Long mod, mask;
 	long[] L, S;
 	byte[] key, keyAl, vector, lastBlock;
+	int progress;
+	Long fileSize = 0L;
+	Encryption.EncodeTask task;
 
-	public rc5(rc5Obj cli) {
+//	Flow.Publisher<utils.subscriberDTO> percent = new Flow.Publisher<>() {
+//		@Override
+//		public void subscribe(Flow.Subscriber<? super utils.subscriberDTO> subscriber) {
+//			int oldValue = 0;
+//			subscriber.onNext(new utils.subscriberDTO("size", fileSize));
+//			while (true) {
+//				if (progress != oldValue){
+//					subscriber.onNext(new utils.subscriberDTO("progress", Long.parseLong(String.valueOf(progress))));
+//					oldValue = progress;
+//				}
+//			}
+//		}
+//	};
+
+
+	public rc5(rc5Obj cli, Encryption.EncodeTask task) {
 		this.cli = cli;
 		this.w = Integer.parseInt(cli.bsize);
 		this.R = Integer.parseInt(cli.rounds);
@@ -38,6 +55,7 @@ public class rc5 {
 		this.keyAlign();
 		this.keyExtend();
 		this.shuffle();
+		this.task = task;
 	}
 
 	long lshift(long val, long n) {
@@ -163,6 +181,8 @@ public class rc5 {
 		bufferSize = 64000;
 		encoded = new byte[64000];
 		FileInputStream inputStream = new FileInputStream(inpFileName);
+		fileSize = inputStream.getChannel().size();
+
 		long startTime = System.currentTimeMillis();
 		long finishTime = 0;
 		createOutFile(outFileName);
@@ -173,12 +193,13 @@ public class rc5 {
 		System.arraycopy(tmp,4,hash,0,4);
 		outputStream.write(hash);
 		while (inputStream.available() > 0) {
+			task.update((long)inputStream.available(), fileSize);
 			if (inputStream.available() < bufferSize) {
 				bufferSize = inputStream.available()+(w4-bufferSize % w4);
 				buffer = new byte[bufferSize + (w4-bufferSize % w4)];
 				encoded = new byte[bufferSize + (w4-bufferSize % w4)];
 			}
-			//noinspection ResultOfMethodCallIgnored
+//			noinspection ResultOfMethodCallIgnored
 			inputStream.read(buffer, 0, bufferSize);
 			for (int i = 0; i < bufferSize ; i += w4) {
 				//System.out.println("print "+ i);

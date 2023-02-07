@@ -4,8 +4,8 @@ module kriptotest{
     requires javafx.fxml;
     requires java.desktop;
     requires java.sql;
-    requires jcommander;
-    requires com.google.common;
+    //requires jcommander;
+    requires jakarta.xml.bind;
     exports main;
     exports sqlite;
     exports GUI;

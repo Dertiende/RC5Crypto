@@ -81,7 +81,8 @@ public class Authorization {
 			if (!keygen.isPassRelevant(loginField.getText(), passField.getText())){
 				errorMessage.setText("Password Must be 10+ symbols of Cyrillic,Latin, numbers and arithmetic operands. Mustn't consists only from login's characters.");
 				errorMessage.setVisible(true);
-				return false;}
+				return false;
+			}
 			db.createUser(obj.login,obj.pass);
 		}
 

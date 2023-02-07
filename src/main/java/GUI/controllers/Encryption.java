@@ -1,8 +1,9 @@
 package GUI.controllers;
 
-import java.awt.*;
+import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -10,24 +11,26 @@ import java.nio.file.Paths;
 import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
 import java.util.ResourceBundle;
-import java.util.regex.Pattern;
 
-import com.google.common.primitives.Longs;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.AnchorPane;
 import javafx.stage.FileChooser;
+import main.Longs;
 import main.rc5;
+import main.rc5Obj;
 import main.utils;
 import sqlite.sqliteDB;
-
-import static main.utils.vector;
 
 public class Encryption {
 
@@ -35,113 +38,168 @@ public class Encryption {
 	private sqliteDB db;
 	private main.keyGenerator keyGen = new main.keyGenerator();
 	private final ObservableList<String> bsize = FXCollections.observableArrayList("16","32");
+	private final ObservableList<String> modes = FXCollections.observableArrayList("Encryption", "Decryption");
 	private final Desktop desktop = Desktop.getDesktop();
 	private final SpinnerValueFactory<Integer> valueFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 255, 1);
-	private String fileName = "^[\\w\\-. ]+$";
-	Pattern patern = Pattern.compile(fileName);
-	@FXML
-	private ResourceBundle resources;
+	@FXML private ResourceBundle resources;
+	@FXML private URL location;
+	@FXML private Label modeField;
+	@FXML private ComboBox<String> blockSizeSelect;
+	@FXML private ComboBox<String> encryptMode;
+	@FXML private ToggleButton changeModeButton;
+	@FXML private Button encryptInputFBtn;
+	@FXML private TextField encryptInputFField;
+	@FXML private TextArea logField;
+	@FXML private Button encryptOutputFBtn;
+	@FXML private TextField encryptOutputFField;
+	@FXML private Spinner<Integer> roundsSelect;
+	@FXML private Button startButton;
+	@FXML private Button encryptStartBtn;
+	@FXML private AnchorPane encryptionPage;
+	@FXML private AnchorPane converterPage;
+	@FXML private ImageView encryptionToggle;
+	@FXML private ImageView converterToggle;
+	@FXML private ProgressBar encryptProgressBar;
+	@FXML private Label encryptPBLabel;
 
-	@FXML
-	private URL location;
+	public class EncodeTask extends Task<Long> {
 
-	@FXML
-	private Label modeField;
+		private final rc5Obj obj;
+		private final boolean isEncode;
 
-	@FXML
-	private ComboBox<String> blockSizeSelect;
+		public EncodeTask(rc5Obj obj, boolean isEncode) {
+			this.obj = obj;
+			this.isEncode = isEncode;
+		}
 
-	@FXML
-	private ToggleButton changeModeButton;
+		@Override
+		protected Long call() throws Exception {
+			updateMessage("    Processing... ");
+			rc5 rc5 = new rc5(obj, this);
+			if (isEncode) {
+				rc5.encryptFile(obj.input, obj.output);
+			} else {
+				rc5.decryptFile(obj.input, obj.output);
+			}
+			startButton.setDisable(false);
+			updateMessage("    Done.  ");
+			return 0L;
+		}
 
-	@FXML
-	private Button inputFileButton;
-
-	@FXML
-	private TextField inputFileField;
-
-	@FXML
-	private TextArea logField;
-
-	@FXML
-	private Button outputFileButton;
-
-	@FXML
-	private TextField outputFileField;
-
-	@FXML
-	private Spinner<Integer> roundsSelect;
-
-	@FXML
-	private Button startButton;
+		public void update(Long newValue, Long size) {
+			updateProgress(size - newValue, size);
+		}
+	}
 
 	@FXML
 	void initialize() {
-		outputFileField.setText(System.getProperty("user.dir")+"\\out.enc");
+		encryptOutputFField.setText(System.getProperty("user.dir")+"\\out.enc");
 		blockSizeSelect.setItems(bsize);
+		encryptMode.setItems(modes);
+		encryptPBLabel.setText("");
 		blockSizeSelect.setValue("16");
 		roundsSelect.setValueFactory(valueFactory);
-		startButton.setOnAction(actionEvent -> {
+		encryptStartBtn.setOnAction(actionEvent -> {
 			try {
-				start();
+				cryptoStart();
 			} catch (NoSuchAlgorithmException | SQLException | IOException e) {
 				e.printStackTrace();
 			}
 		});
-		changeModeButton.setOnAction(actionEvent -> changeMode());
-		inputFileField.setOnAction(actionEvent -> isInputFileCorrect(inputFileField.getText()));
-		inputFileButton.setOnAction(actionEvent -> {
+//		changeModeButton.setOnAction(actionEvent -> changeMode());
+		encryptInputFField.setOnAction(actionEvent -> isInputFileCorrect(encryptInputFField.getText()));
+		encryptInputFBtn.setOnAction(actionEvent -> {
 			selectInputFile();
-			isInputFileCorrect(inputFileField.getText());
+			isInputFileCorrect(encryptInputFField.getText());
 		});
-		inputFileField.textProperty().addListener((observableValue, s, t1) -> isInputFileCorrect(t1));
-		outputFileField.textProperty().addListener((observableValue, s, t1) -> isOutputFileCorrect(t1));
-		outputFileField.setOnAction(actionEvent -> isOutputFileCorrect(outputFileField.getText()));
-		outputFileButton.setOnAction(actionEvent -> {
+		encryptInputFField.textProperty().addListener((observableValue, s, t1) -> isInputFileCorrect(t1));
+		encryptOutputFField.textProperty().addListener((observableValue, s, t1) -> isOutputFileCorrect(t1));
+		encryptOutputFField.setOnAction(actionEvent -> isOutputFileCorrect(encryptOutputFField.getText()));
+		encryptOutputFBtn.setOnAction(actionEvent -> {
 			selectOutFile();
-			isOutputFileCorrect(outputFileField.getText());
+			isOutputFileCorrect(encryptOutputFField.getText());
 		});
 		roundsSelect.valueProperty().addListener((this::handleSpin));
-
+		InputStream encrypt = this.getClass().getResourceAsStream("/images/encrypt.png");
+		if (encrypt != null) {
+			encryptionToggle.setImage(new Image(encrypt));
+		}
+		InputStream convert = this.getClass().getResourceAsStream("/images/convertDisabled.png");
+		if (convert != null) {
+			converterToggle.setImage(new Image(convert));
+		}
 
 	}
+
+	@FXML
+	void activateEncryptMode() {
+		encryptionPage.setManaged(true);
+		encryptionPage.setVisible(true);
+		converterPage.setManaged(false);
+		converterPage.setVisible(false);
+		InputStream encrypt = this.getClass().getResourceAsStream("/images/encrypt.png");
+		if (encrypt != null) {
+			encryptionToggle.setImage(new Image(encrypt));
+		}
+		InputStream convert = this.getClass().getResourceAsStream("/images/convertDisabled.png");
+		if (convert != null) {
+			converterToggle.setImage(new Image(convert));
+		}
+	}
+
+	@FXML
+	void activateConvertMode() {
+		converterPage.setManaged(true);
+		converterPage.setVisible(true);
+		encryptionPage.setManaged(false);
+		encryptionPage.setVisible(false);
+		InputStream encrypt = this.getClass().getResourceAsStream("/images/encryptDisabled.png");
+		if (encrypt != null) {
+			encryptionToggle.setImage(new Image(encrypt));
+		}
+		InputStream convert = this.getClass().getResourceAsStream("/images/convert.png");
+		if (convert != null) {
+			converterToggle.setImage(new Image(convert));
+		}
+	}
+
 
 	private boolean isOutputFileCorrect(String file){
 		String check = file.substring(0,file.lastIndexOf("\\"));
 		String fname = file.substring(file.lastIndexOf("\\")+1);
 		try{
 		if (!(Files.isDirectory(Path.of(check))) || fname.length()== 0){
-			outputFileField.setStyle("-fx-border-color: red; -fx-border-radius: 3");
+			encryptOutputFField.setStyle("-fx-border-color: red; -fx-border-radius: 3");
 			return false;
 		}
 		else{
-			outputFileField.setStyle("");
+			encryptOutputFField.setStyle("");
 			return true;
 		}
 		}
 		catch (Exception e){
-			outputFileField.setStyle("-fx-border-color: red; -fx-border-radius: 3");
+			encryptOutputFField.setStyle("-fx-border-color: red; -fx-border-radius: 3");
 			return false;
 		}
 	}
 
 	private boolean isInputFileCorrect(String file){
 		if (!(new File(file).isFile())){
-			inputFileField.setStyle("-fx-border-color: red; -fx-border-radius: 3");
+			encryptInputFField.setStyle("-fx-border-color: red; -fx-border-radius: 3");
 			return false;
 		}
 		else{
-			inputFileField.setStyle("");
+			encryptInputFField.setStyle("");
 			return true;
 		}
 	}
 
-	private void start() throws NoSuchAlgorithmException, SQLException, IOException {
-		if (!isInputFileCorrect(inputFileField.getText()) ||
-				    !isOutputFileCorrect(outputFileField.getText())){
+	private void cryptoStart() throws NoSuchAlgorithmException, SQLException, IOException {
+		if (!isInputFileCorrect(encryptInputFField.getText()) ||
+	        !isOutputFileCorrect(encryptOutputFField.getText())){
 			return;
 		}
-		else{
+		else {
 			startButton.setDisable(true);
 			setObj();
 			if (obj.mode.compareToIgnoreCase("encryption") == 0){
@@ -149,45 +207,25 @@ public class Encryption {
 				rc5.getEncryption(this);
 				utils.getEncryption(this);
 				sqliteDB.getEncryption(this);
-				rc5 rc5 = new rc5(obj);
-				Runnable r = ()->{
-
-					try {
-						rc5.encryptFile(obj.input,obj.output);
-						startButton.setDisable(false);
-					} catch (IOException | SQLException e) {
-						e.printStackTrace();
-					}
-				};
-				Thread rc5Thread = new Thread(r,"rc5Thread");
-				rc5Thread.start();
-				//rc5 rc5 = new rc5(obj);
-
+				EncodeTask task = new EncodeTask(obj, true);
+				encryptProgressBar.progressProperty().bind(task.progressProperty());
+				encryptProgressBar.progressProperty().addListener((observable, oldValue, newValue) -> {
+					encryptPBLabel.setText(Math.round(newValue.floatValue() * 100) + "%");
+				});
+				new Thread(task).start();
 				logField.setWrapText(true);
 				logField.setText("Encryption started");
 
 			}
 			else {
-
 				utils.getDecodeInfo(obj,obj.input);
 				sqliteDB.getRC5Data(obj.hash);
 				sqliteDB.getEncryption(this);
 				rc5.getEncryption(this);
 				utils.getEncryption(this);
-				rc5 rc5 = new rc5(obj);
-				Runnable r = ()->{
-
-					try {
-						rc5.decryptFile(obj.input,obj.output);
-						startButton.setDisable(false);
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-				};
-				Thread rc5Thread = new Thread(r,"rc5Thread");
-				rc5Thread.start();
-
-
+				EncodeTask task = new EncodeTask(obj, false);
+				encryptProgressBar.progressProperty().bind(task.progressProperty());
+				new Thread(task).start();
 				logField.setWrapText(true);
 				logField.setText("Decryption started");
 
@@ -203,11 +241,11 @@ public class Encryption {
 
 	private void setObj() throws IOException {
 
-		obj.mode = modeField.getText();
+		obj.mode = encryptMode.getValue();
 		obj.bsize = blockSizeSelect.getValue();
 		obj.rounds = roundsSelect.getValue().toString();
-		obj.input = inputFileField.getText();
-		obj.output = outputFileField.getText();
+		obj.input = encryptInputFField.getText();
+		obj.output = encryptOutputFField.getText();
 		byte[] vectorB = utils.vector(Integer.parseInt(obj.bsize)/4);
 		if (vectorB.length<8){
 			obj.vector = String.valueOf(utils.fromBytes(vectorB[0],vectorB[1],vectorB[2],vectorB[3]));
@@ -233,17 +271,17 @@ public class Encryption {
 
 	private void selectInputFile(){
 		final FileChooser fileChooser = new FileChooser();
-		File file = fileChooser.showOpenDialog(inputFileButton.getScene().getWindow());
+		File file = fileChooser.showOpenDialog(encryptInputFBtn.getScene().getWindow());
 		if (file != null) {
-			inputFileField.setText(file.getAbsolutePath());
+			encryptInputFField.setText(file.getAbsolutePath());
 		}
 	}
 
 	private void selectOutFile(){
 		final FileChooser fileChooser = new FileChooser();
-		File file = fileChooser.showSaveDialog(outputFileButton.getScene().getWindow());
+		File file = fileChooser.showSaveDialog(encryptOutputFBtn.getScene().getWindow());
 		if (file != null) {
-			outputFileField.setText(file.getAbsolutePath());
+			encryptOutputFField.setText(file.getAbsolutePath());
 		}
 	}
 
