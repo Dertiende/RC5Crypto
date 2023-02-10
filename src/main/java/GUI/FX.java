@@ -1,5 +1,6 @@
 package GUI;
 
+import GUI.controllers.Authorization;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -9,6 +10,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import main.ConverterService;
 
 import java.awt.Desktop;
 import java.io.File;
@@ -21,41 +23,16 @@ public class FX extends Application {
     }
     private final Desktop desktop = Desktop.getDesktop();
     public void start(Stage primaryStage) throws Exception {
+//        String filePath = "D:\\Alex\\Downloads\\Video\\sample_1280x720_surfing_with_audio.avi";
+//        ConverterService.convertVideo(new File(filePath));
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/authorization.fxml"));
         Parent root = loader.load();
         primaryStage.setTitle("RC5Crypto");
         primaryStage.setScene(new Scene(root,400,350));
-        Button openBtn = new Button("Select file");
-        final FileChooser fileChooser = new FileChooser();
-        final TextField inp = new TextField();
-//        VBox root = new VBox();
-//        root.setSpacing(5);
-//
-//        root.getChildren().addAll(inp, openBtn);
-//        EventHandler<ActionEvent> event = new EventHandler<ActionEvent>() {
-//                    public void handle(ActionEvent e)
-//                    {
-//                        // get the file selected
-//                        File file = fileChooser.showOpenDialog(primaryStage);
-//                        if (file != null) {
-//                            inp.setText(file.getAbsolutePath());
-//                        }
-//                    }
-//                };
-//       openBtn.setOnAction(event);
         primaryStage.getIcons().add(new Image("vec1.png"));
         primaryStage.setResizable(false);
         primaryStage.show();
-    }
-
-
-
-    private void openFile(File file) {
-        try {
-
-            this.desktop.open(file);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        Authorization authorization = loader.getController();
+        authorization.login();
     }
 }

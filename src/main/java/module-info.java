@@ -6,6 +6,9 @@ module kriptotest{
     requires java.sql;
     //requires jcommander;
     requires jakarta.xml.bind;
+    requires org.bytedeco.javacv;
+    requires org.bytedeco.ffmpeg;
+    requires lombok;
     exports main;
     exports sqlite;
     exports GUI;

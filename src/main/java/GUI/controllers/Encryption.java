@@ -25,6 +25,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
+import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import main.Longs;
 import main.rc5;
@@ -61,6 +62,11 @@ public class Encryption {
 	@FXML private ImageView converterToggle;
 	@FXML private ProgressBar encryptProgressBar;
 	@FXML private Label encryptPBLabel;
+	@FXML private TextField cvrOutFileName;
+	@FXML private TextField cvrInputFField;
+	@FXML private TextField cvrOutputFField;
+	@FXML private Button cvrOutputFBtn;
+	@FXML private Button cvrInputFBtn;
 
 	public class EncodeTask extends Task<Long> {
 
@@ -99,6 +105,29 @@ public class Encryption {
 		encryptPBLabel.setText("");
 		blockSizeSelect.setValue("16");
 		roundsSelect.setValueFactory(valueFactory);
+		cvrOutputFField.setDisable(true);
+		cvrOutputFBtn.setOnAction(event -> {
+			final DirectoryChooser chooser = new DirectoryChooser();
+			File file = chooser.showDialog(cvrOutputFBtn.getScene().getWindow());
+			if (file != null) {
+				cvrOutputFField.setText(file.getAbsolutePath());
+			}
+		});
+		cvrInputFBtn.setOnAction(event -> {
+			selectInputFile();
+			isInputFileCorrect(cvrInputFField);
+		});
+		cvrOutputFField.textProperty().addListener(((observable, oldValue, newValue) -> isOutputFolderCorrect(newValue)));
+		cvrInputFField.textProperty().addListener((observableValue, s, t1) -> isInputFileCorrect(cvrInputFField));
+		cvrOutFileName.textProperty().addListener((observableValue, s, t1) -> {
+			String path = cvrOutputFField.getText().lastIndexOf(s) == -1
+              ? cvrOutputFField.getText()
+			  : cvrOutputFField.getText().substring(0, cvrOutputFField.getText().lastIndexOf(s));
+			if (!path.endsWith("\\")) {
+				path += "\\";
+			}
+			cvrOutputFField.setText(path + (!t1.equals("") ? t1 + ".mp4" : t1));
+		});
 		encryptStartBtn.setOnAction(actionEvent -> {
 			try {
 				cryptoStart();
@@ -106,13 +135,14 @@ public class Encryption {
 				e.printStackTrace();
 			}
 		});
+
 //		changeModeButton.setOnAction(actionEvent -> changeMode());
-		encryptInputFField.setOnAction(actionEvent -> isInputFileCorrect(encryptInputFField.getText()));
+		encryptInputFField.setOnAction(actionEvent -> isInputFileCorrect(encryptInputFField));
 		encryptInputFBtn.setOnAction(actionEvent -> {
 			selectInputFile();
-			isInputFileCorrect(encryptInputFField.getText());
+			isInputFileCorrect(encryptInputFField);
 		});
-		encryptInputFField.textProperty().addListener((observableValue, s, t1) -> isInputFileCorrect(t1));
+		encryptInputFField.textProperty().addListener((observableValue, s, t1) -> isInputFileCorrect(encryptInputFField));
 		encryptOutputFField.textProperty().addListener((observableValue, s, t1) -> isOutputFileCorrect(t1));
 		encryptOutputFField.setOnAction(actionEvent -> isOutputFileCorrect(encryptOutputFField.getText()));
 		encryptOutputFBtn.setOnAction(actionEvent -> {
@@ -120,15 +150,7 @@ public class Encryption {
 			isOutputFileCorrect(encryptOutputFField.getText());
 		});
 		roundsSelect.valueProperty().addListener((this::handleSpin));
-		InputStream encrypt = this.getClass().getResourceAsStream("/images/encrypt.png");
-		if (encrypt != null) {
-			encryptionToggle.setImage(new Image(encrypt));
-		}
-		InputStream convert = this.getClass().getResourceAsStream("/images/convertDisabled.png");
-		if (convert != null) {
-			converterToggle.setImage(new Image(convert));
-		}
-
+		activateEncryptMode();
 	}
 
 	@FXML
@@ -163,6 +185,25 @@ public class Encryption {
 		}
 	}
 
+	private boolean isOutputFolderCorrect(String folder){
+		if (!cvrOutFileName.getText().equals("")){
+			folder = folder.substring(0, folder.lastIndexOf(cvrOutFileName.getText()));
+		}
+		try {
+			if (!(Files.isDirectory(Path.of(folder)))){
+				cvrOutputFField.setStyle("-fx-border-color: red; -fx-border-radius: 3");
+				return false;
+			}
+			else{
+				cvrOutputFField.setStyle("");
+				return true;
+			}
+		}
+		catch (Exception e){
+			cvrOutputFField.setStyle("-fx-border-color: red; -fx-border-radius: 3");
+			return false;
+		}
+	}
 
 	private boolean isOutputFileCorrect(String file){
 		String check = file.substring(0,file.lastIndexOf("\\"));
@@ -183,8 +224,8 @@ public class Encryption {
 		}
 	}
 
-	private boolean isInputFileCorrect(String file){
-		if (!(new File(file).isFile())){
+	private boolean isInputFileCorrect(TextField field){
+		if (!(new File(field.getText()).isFile())){
 			encryptInputFField.setStyle("-fx-border-color: red; -fx-border-radius: 3");
 			return false;
 		}
@@ -194,42 +235,46 @@ public class Encryption {
 		}
 	}
 
-	private void cryptoStart() throws NoSuchAlgorithmException, SQLException, IOException {
-		if (!isInputFileCorrect(encryptInputFField.getText()) ||
-	        !isOutputFileCorrect(encryptOutputFField.getText())){
+	private void convertStart() {
+		if (!isInputFileCorrect(encryptInputFField) || !isOutputFileCorrect(encryptOutputFField.getText())){
 			return;
 		}
+		startButton.setDisable(true);
+		File inputFile = new File(encryptInputFField.getText());
+		File outputFile = new File(encryptOutputFField.getText());
+	}
+	private void cryptoStart() throws NoSuchAlgorithmException, SQLException, IOException {
+		if (!isInputFileCorrect(encryptInputFField) || !isOutputFileCorrect(encryptOutputFField.getText())){
+			return;
+		}
+		startButton.setDisable(true);
+		setObj();
+		if (obj.mode.compareToIgnoreCase("encryption") == 0){
+			obj.key =  keyGen.getKey();
+			rc5.getEncryption(this);
+			utils.getEncryption(this);
+			sqliteDB.getEncryption(this);
+			EncodeTask task = new EncodeTask(obj, true);
+			encryptProgressBar.progressProperty().bind(task.progressProperty());
+			encryptProgressBar.progressProperty().addListener((observable, oldValue, newValue) -> {
+				encryptPBLabel.setText(Math.round(newValue.floatValue() * 100) + "%");
+			});
+			new Thread(task).start();
+			logField.setWrapText(true);
+			logField.setText("Encryption started");
+
+		}
 		else {
-			startButton.setDisable(true);
-			setObj();
-			if (obj.mode.compareToIgnoreCase("encryption") == 0){
-				obj.key =  keyGen.getKey();
-				rc5.getEncryption(this);
-				utils.getEncryption(this);
-				sqliteDB.getEncryption(this);
-				EncodeTask task = new EncodeTask(obj, true);
-				encryptProgressBar.progressProperty().bind(task.progressProperty());
-				encryptProgressBar.progressProperty().addListener((observable, oldValue, newValue) -> {
-					encryptPBLabel.setText(Math.round(newValue.floatValue() * 100) + "%");
-				});
-				new Thread(task).start();
-				logField.setWrapText(true);
-				logField.setText("Encryption started");
-
-			}
-			else {
-				utils.getDecodeInfo(obj,obj.input);
-				sqliteDB.getRC5Data(obj.hash);
-				sqliteDB.getEncryption(this);
-				rc5.getEncryption(this);
-				utils.getEncryption(this);
-				EncodeTask task = new EncodeTask(obj, false);
-				encryptProgressBar.progressProperty().bind(task.progressProperty());
-				new Thread(task).start();
-				logField.setWrapText(true);
-				logField.setText("Decryption started");
-
-			}
+			utils.getDecodeInfo(obj,obj.input);
+			sqliteDB.getRC5Data(obj.hash);
+			sqliteDB.getEncryption(this);
+			rc5.getEncryption(this);
+			utils.getEncryption(this);
+			EncodeTask task = new EncodeTask(obj, false);
+			encryptProgressBar.progressProperty().bind(task.progressProperty());
+			new Thread(task).start();
+			logField.setWrapText(true);
+			logField.setText("Decryption started");
 
 		}
 	}

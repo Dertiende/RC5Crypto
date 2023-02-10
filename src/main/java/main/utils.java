@@ -10,7 +10,6 @@ import java.util.Arrays;
 import java.util.Random;
 import java.util.zip.CRC32;
 
-
 public class utils {
 	static Encryption encryption;
 	public static long pow(int a, int b) {

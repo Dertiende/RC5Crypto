@@ -89,7 +89,7 @@ public class Authorization {
 		return true;
 	}
 
-	private void login(){
+	public void login(){
 
 		FXMLLoader loader = new FXMLLoader();
 		loader.setLocation(getClass().getResource("/fxml/encryption.fxml"));

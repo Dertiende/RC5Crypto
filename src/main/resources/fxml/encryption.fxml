@@ -7,7 +7,6 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ProgressBar?>
 <?import javafx.scene.control.Spinner?>
-<?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
@@ -43,25 +42,25 @@
             </Label>
          </children>
       </AnchorPane>
-      <AnchorPane fx:id="converterPage" layoutX="50.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="700.0" visible="false">
+      <AnchorPane fx:id="converterPage" layoutX="50.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="700.0">
          <children>
             <Label alignment="CENTER" layoutX="200.0" layoutY="77.0" prefHeight="40.0" prefWidth="300.0" style="-fx-font-size: 30;" text="Converter" />
-            <Button fx:id="inputFileBtn" layoutX="426.0" layoutY="200.0" mnemonicParsing="false" prefHeight="30.0" prefWidth="52.0" text="Select">
+            <Button fx:id="cvrInputFBtn" layoutX="426.0" layoutY="200.0" mnemonicParsing="false" prefHeight="30.0" prefWidth="52.0" text="Select">
                <font><Font name="Verdana" size="11.0" /></font>
             </Button>
-            <TextField fx:id="inputfileField" layoutX="115.0" layoutY="200.0" prefHeight="30.0" prefWidth="300.0">
+            <TextField fx:id="cvrInputFField" layoutX="115.0" layoutY="200.0" prefHeight="30.0" prefWidth="300.0">
                <font><Font name="Verdana" size="11.0" /></font>
             </TextField>
-            <TextField fx:id="outputFileField" layoutX="115.0" layoutY="252.0" prefHeight="30.0" prefWidth="300.0">
+            <TextField fx:id="cvrOutputFField" layoutX="115.0" layoutY="252.0" prefHeight="30.0" prefWidth="300.0">
                <font><Font name="Verdana" size="11.0" /></font>
             </TextField>
-            <Button fx:id="outputFileBtn" layoutX="426.0" layoutY="252.0" mnemonicParsing="false" prefHeight="30.0" prefWidth="52.0" text="Select">
+            <Button fx:id="cvrOutputFBtn" layoutX="426.0" layoutY="252.0" mnemonicParsing="false" prefHeight="30.0" prefWidth="52.0" text="Select">
                <font><Font name="Verdana" size="11.0" /></font>
             </Button>
             <Label alignment="CENTER" layoutX="45.0" layoutY="200.0" maxHeight="30.0" maxWidth="70.0" minHeight="30.0" minWidth="70.0" prefHeight="30.0" prefWidth="70.0" text="Input file">
                <font><Font name="Verdana" size="11.0" /></font>
             </Label>
-            <Label alignment="CENTER" layoutX="45.0" layoutY="252.0" maxHeight="30.0" maxWidth="70.0" minHeight="30.0" minWidth="70.0" prefHeight="30.0" prefWidth="70.0" text="Output file">
+            <Label alignment="CENTER" layoutX="33.0" layoutY="252.0" maxHeight="30.0" maxWidth="82.0" minHeight="30.0" minWidth="70.0" prefHeight="30.0" prefWidth="82.0" text="Output folder">
                <font><Font name="Verdana" size="11.0" /></font>
             </Label>
 <!--            <ComboBox fx:id="blockSizeSelect" layoutX="590.0" layoutY="82.0" maxHeight="30.0" maxWidth="70.0" minHeight="30.0" minWidth="70.0" prefHeight="30.0" prefWidth="70.0" visibleRowCount="2" />-->
@@ -70,9 +69,15 @@
                <font><Font name="Calibri Bold" size="20.0" /></font>
             </Button>
             <ProgressBar fx:id="progressBar" layoutX="64.0" layoutY="353.0" prefHeight="25.0" prefWidth="350.0" progress="0.0" />
+            <TextField fx:id="cvrOutFileName" layoutX="190.0" layoutY="297.0" prefHeight="30.0" prefWidth="150.0" />
+            <Label alignment="CENTER" layoutX="73.0" layoutY="297.0" maxHeight="30.0" maxWidth="108.0" minHeight="30.0" minWidth="70.0" prefHeight="30.0" prefWidth="108.0" text="Output file name">
+               <font>
+                  <Font name="Verdana" size="11.0" />
+               </font>
+            </Label>
          </children>
       </AnchorPane>
-      <AnchorPane fx:id="encryptionPage" layoutX="50.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="700.0">
+      <AnchorPane fx:id="encryptionPage" layoutX="50.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="700.0" visible="false">
          <children>
             <Button fx:id="encryptInputFBtn" layoutX="426.0" layoutY="200.0" mnemonicParsing="false" prefHeight="30.0" prefWidth="52.0" text="Select">
                <font><Font name="Verdana" size="11.0" /></font>
