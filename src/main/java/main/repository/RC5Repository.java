@@ -11,4 +11,10 @@ import java.util.Optional;
 public interface RC5Repository extends JpaRepository<RC5Data, Long> {
 
 	Optional<RC5Data> findRC5DataByUserAndHash(User user, Long hash);
+
+	@Override
+	RC5Data save(RC5Data entity);
+
+	@Override
+	void delete(RC5Data entity);
 }
