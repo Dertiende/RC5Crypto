@@ -1,8 +1,9 @@
-package main;
+package main.utils;
 
-import GUI.controllers.Encryption;
-//import com.beust.jcommander.JCommander;
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigInteger;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -10,8 +11,8 @@ import java.util.Arrays;
 import java.util.Random;
 import java.util.zip.CRC32;
 
-public class utils {
-	static Encryption encryption;
+public class CryptoUtils {
+
 	public static long pow(int a, int b) {
 		long pow = 1;
 		for (int i = 0; i < b; i++) pow *= a;
@@ -31,10 +32,6 @@ public class utils {
 		byte[] vector = new byte[w4];
 		new Random().nextBytes(vector);
 		return vector;
-	}
-
-	public static void getEncryption(Encryption encryption) {
-		utils.encryption = encryption;
 	}
 
 	private static byte[] fillReversed(byte[] old, int w8) {
@@ -87,34 +84,9 @@ public class utils {
 		return w4Array;
 	}
 
-//	private static void cliParse(rc5Obj cli , String[] args) {
-//		JCommander jCommander =  JCommander.newBuilder()
-//				.addObject(cli)
-//				.build();
-//		if (args.length == 0){
-//			jCommander.usage();
-//			System.out.println("Press Any Key To Continue...");
-//			new java.util.Scanner(System.in).nextLine();
-//			System.exit(0);
-//		}
-//		else{
-//			jCommander.parse(args);
-//		}
-//
-//	}
-
-	public static rc5Obj getCLI(String[] args) throws IOException {
-		rc5Obj cli = new rc5Obj();
-		//cliParse(cli,args);
-		cli.size = String.valueOf(Files.size(Paths.get(cli.input)));
-		byte[] vectorB = vector(Integer.parseInt(cli.bsize)/4);
-		cli.vector = String.valueOf(Longs.fromByteArray(vectorB));
-		return cli;
-	}
-
 	public static long getCRC32(String filepath) throws IOException {
 
-		InputStream inputStream = new BufferedInputStream(new FileInputStream(filepath));
+		InputStream inputStream = new BufferedInputStream(Files.newInputStream(Paths.get(filepath)));
 		CRC32 crc = new CRC32();
 		int cnt;
 		while ((cnt = inputStream.read()) != -1) {
@@ -123,37 +95,29 @@ public class utils {
 		return crc.getValue();
 	}
 
-	public static void getDecodeInfo(rc5Obj cli,String path) throws IOException {
+	public static Long getDecodeInfo(String path) throws IOException {
 		byte[] hash = new byte[4];
 		FileInputStream inputStream = new FileInputStream(path);
 		//noinspection ResultOfMethodCallIgnored
 		inputStream.read(hash,0,4);
 		inputStream.close();
-		cli.hash = String.valueOf(fromBytes(hash[0],hash[1],hash[2],hash[3]));
-		int k = 0;
-
+		return fromBytes(hash);
 	}
-	public static long fromBytes(byte b1, byte b2, byte b3, byte b4) {
-		return (b1 & 255L) << 24 | (b2 & 255L) << 16 | (b3 & 255L) << 8 | b4 & 255L;
+	public static long fromBytes(byte[] bytes) {
+		return bytes.length > 4
+	       ? Longs.fromByteArray(bytes)
+	       : (bytes[0] & 255L) << 24 | (bytes[1] & 255L) << 16 | (bytes[2] & 255L) << 8 | bytes[3] & 255L;
 	}
 
 	public static void isHashCorrect(long h1, long h2){
 		if (h1 == h2){
-			encryption.print("File integrity verified");
-			//System.out.println("File integrity verified.");
+//			encryption.print("File integrity verified");
+			System.out.println("File integrity verified.");
 		}
 		else{
-			encryption.print("Integrity check fails");
-			//System.out.println("Integrity check fails.");
+//			encryption.print("Integrity check fails");
+			System.out.println("Integrity check fails.");
 		}
 	}
 
-	public static class subscriberDTO{
-		public String name;
-		public Long value;
-		subscriberDTO(String name, Long value){
-			this.name = name;
-			this.value = value;
-		}
-	}
 }

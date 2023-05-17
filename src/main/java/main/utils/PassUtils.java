@@ -1,30 +1,34 @@
-package main;
+package main.utils;
+
+import jakarta.xml.bind.DatatypeConverter;
 
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Base64;
 import java.util.Random;
 
-public class keyGenerator {
+public class PassUtils {
 	KeyGenerator key;
 	SecretKey secretKey;
 	String stringKey;
-	final char[] lowercaseLatin = "abcdefghijklmnopqrstuvwxyz".toCharArray();
-	final char[] uppercaseLatin = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".toCharArray();
-	final char[] lowercaseKirilic = "абвгдеёжзийклмнопрстуфхцчшщъыьэюя".toCharArray();
-	final char[] uppercaseKirilic = "АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ".toCharArray();
-	final char[] numbers = "0123456789".toCharArray();
-	final char[] symbols = "+-=*/".toCharArray();
-	final char[] allAllowed = ("abcdefghijklmnopqrstuvwxyz" +
+	static final char[] lowercaseLatin = "abcdefghijklmnopqrstuvwxyz".toCharArray();
+	static final char[] uppercaseLatin = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".toCharArray();
+	static final char[] lowercaseKirilic = "абвгдеёжзийклмнопрстуфхцчшщъыьэюя".toCharArray();
+	static final char[] uppercaseKirilic = "АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ".toCharArray();
+	static final char[] numbers = "0123456789".toCharArray();
+	static final char[] symbols = "+-=*/".toCharArray();
+	static final char[] allAllowed = ("abcdefghijklmnopqrstuvwxyz" +
 			                           "ABCDEFGHIJKLMNOPQRSTUVWXYZ" +
 			                           "абвгдеёжзийклмнопрстуфхцчшщъыьэюя" +
 			                           "АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ" +
 			                           "0123456789" +
 			                           "+-=*/^?!@").toCharArray();
 
-	public keyGenerator() {
+	public PassUtils() {
 
 	}
 
@@ -59,7 +63,7 @@ public class keyGenerator {
         return password.toString();
 	}
 
-	public boolean isPassRelevant(String name,String pass){
+	public static boolean isPassRelevant(String name, String pass){
 		int counter = 0;
 		int passIsName = 0;
 		for (char i: name.toCharArray()){
@@ -75,12 +79,18 @@ public class keyGenerator {
 		return counter == 6;
 
 	}
-	private int isContain(String pass, char[] c){
+	private static int isContain(String pass, char[] c){
 		for (char ch : c) {
 			if (pass.contains(String.valueOf(ch))) {
 				return 1;
 			}
 		}
 		return 0;
+	}
+
+	public static String hashPass(String pass) throws NoSuchAlgorithmException {
+		byte[] digest = MessageDigest.getInstance("MD5").digest(pass.getBytes(StandardCharsets.UTF_8));
+		return  DatatypeConverter.printHexBinary(digest);
+
 	}
 }

@@ -1,0 +1,13 @@
+spring:
+  application:
+    name: tool
+  datasource:
+    type: com.zaxxer.hikari.HikariDataSource
+    url: jdbc:postgresql://localhost:5432/RC5CryptoDB
+    username: postgres
+    password: postgres
+    hikari:
+      poolName: Hikari
+      auto-commit: false
+  jpa:
+    show-sql: false

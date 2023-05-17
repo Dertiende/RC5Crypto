@@ -1,68 +1,48 @@
-package main;
+package main.utils;
 
-import GUI.controllers.Encryption;
-import sqlite.sqliteDB;
+import main.domain.RC5Data;
+import main.model.RequestInfo;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
-import java.sql.SQLException;
 import java.util.Arrays;
 
-public class rc5 {
-	static Encryption encryption;
-	rc5Obj cli;
+public class CryptoProviderRC5 {
 	public static int sizeModW4;
-	public static long size = 0;
+	long size;
 	int c, b, w, w4, w8, T, R;
 	Long mod, mask;
 	long[] L, S;
 	byte[] key, keyAl, vector, lastBlock;
-	int progress;
-	Long fileSize = 0L;
-	Encryption.EncodeTask task;
-
-//	Flow.Publisher<utils.subscriberDTO> percent = new Flow.Publisher<>() {
-//		@Override
-//		public void subscribe(Flow.Subscriber<? super utils.subscriberDTO> subscriber) {
-//			int oldValue = 0;
-//			subscriber.onNext(new utils.subscriberDTO("size", fileSize));
-//			while (true) {
-//				if (progress != oldValue){
-//					subscriber.onNext(new utils.subscriberDTO("progress", Long.parseLong(String.valueOf(progress))));
-//					oldValue = progress;
-//				}
-//			}
-//		}
-//	};
 
 
-	public rc5(rc5Obj cli, Encryption.EncodeTask task) {
-		this.cli = cli;
-		this.w = Integer.parseInt(cli.bsize);
-		this.R = Integer.parseInt(cli.rounds);
-		this.key = cli.key.getBytes(StandardCharsets.UTF_8);
+	public CryptoProviderRC5(RC5Data rc5Data) {
+		this.w = rc5Data.getBsize();
+		this.R = rc5Data.getRounds();
+		this.key = rc5Data.getKey().getBytes(StandardCharsets.UTF_8);
 		this.T = 2 * (R + 1);
 		this.w4 = w / 4;
 		this.w8 = w / 8;
-		this.mod = utils.pow(2, w);
+		this.mod = CryptoUtils.pow(2, w);
 		this.mask = mod - 1;
 		this.b = key.length;
-		size = Long.parseLong(cli.size);
+		size = rc5Data.getSize();
 		sizeModW4 = w4-(int) (size % w4);
-		lastBlock = Longs.toByteArray(Long.parseLong(cli.vector));
+		lastBlock = Longs.toByteArray(rc5Data.getVector());
 		vector = Arrays.copyOf(lastBlock, w4);
 		this.keyAlign();
 		this.keyExtend();
 		this.shuffle();
-		this.task = task;
 	}
 
 	long lshift(long val, long n) {
 		n %= w;
 		return ((val << n) & mask) | ((val & mask) >> (w - n));
 	}
-
 
 	long rshift(long val, long n) {
 		n %= w;
@@ -123,11 +103,7 @@ public class rc5 {
 		}
 	}
 
-	public static void getEncryption(Encryption encryption) {
-		rc5.encryption = encryption;
-	}
-
-	byte[] encryptBlock(byte[] data) {
+	byte[] processBlock(byte[] data, boolean isEncrypt) {
 		byte[] dataA = new byte[w8];
 		byte[] dataB = new byte[w8];
 		for (int i = 0; i < w8; i++) {
@@ -138,74 +114,57 @@ public class rc5 {
 		}
 		BigInteger A = new BigInteger(1, dataA);
 		BigInteger B = new BigInteger(1, dataB);
-		A = A.add(BigInteger.valueOf(S[0])).mod(BigInteger.valueOf(this.mod));
-		B = B.add(BigInteger.valueOf(S[1])).mod(BigInteger.valueOf(this.mod));
-
-		for (int i = 1; i <= this.R; i++) {
-			A = BigInteger.valueOf((lshift((A.longValue() ^ B.longValue()), B.longValue()) + S[2 * i]) % this.mod);
-			B = BigInteger.valueOf((lshift((A.longValue() ^ B.longValue()), A.longValue()) + S[2 * i + 1]) % this.mod);
+		if (isEncrypt) {
+			A = A.add(BigInteger.valueOf(S[0])).mod(BigInteger.valueOf(this.mod));
+			B = B.add(BigInteger.valueOf(S[1])).mod(BigInteger.valueOf(this.mod));
+			for (int i = 1; i <= this.R; i++) {
+				A = BigInteger.valueOf((lshift((A.longValue() ^ B.longValue()), B.longValue()) + S[2 * i]) % this.mod);
+				B = BigInteger.valueOf((lshift((A.longValue() ^ B.longValue()), A.longValue()) + S[2 * i + 1]) % this.mod);
+			}
+		} else {
+			for (int i = this.R; i > 0; i--) {
+				B = BigInteger.valueOf(rshift(B.longValue() - S[2 * i + 1], A.longValue()) ^ A.longValue());
+				A = BigInteger.valueOf(rshift(A.longValue() - S[2 * i], B.longValue()) ^ B.longValue());
+			}
+			B = B.subtract(BigInteger.valueOf(S[1])).mod(BigInteger.valueOf(this.mod));
+			A = A.subtract(BigInteger.valueOf(S[0])).mod(BigInteger.valueOf(this.mod));
 		}
-		dataA = utils.reverse(A, w8);
-		dataB = utils.reverse(B, w8);
-
-		return utils.byteSum(dataA, dataB);
+		dataA = CryptoUtils.reverse(A, w8);
+		dataB = CryptoUtils.reverse(B, w8);
+		return CryptoUtils.byteSum(dataA, dataB);
 	}
 
-	byte[] decryptBlock(byte[] data) {
-		byte[] dataA = new byte[w8];
-		byte[] dataB = new byte[w8];
-		for (int i = 0; i < w8; i++) {
-			dataA[dataA.length - i - 1] = data[i];
-		}
-		for (int i = 0; i < w8; i++) {
-			dataB[dataB.length - i - 1] = data[w8 + i];
-		}
-		BigInteger A = new BigInteger(1, dataA);
-		BigInteger B = new BigInteger(1, dataB);
-
-		for (int i = this.R; i > 0; i--) {
-			B = BigInteger.valueOf(rshift(B.longValue() - S[2 * i + 1], A.longValue()) ^ A.longValue());
-			A = BigInteger.valueOf(rshift(A.longValue() - S[2 * i], B.longValue()) ^ B.longValue());
-		}
-		B = B.subtract(BigInteger.valueOf(S[1])).mod(BigInteger.valueOf(this.mod));
-		A = A.subtract(BigInteger.valueOf(S[0])).mod(BigInteger.valueOf(this.mod));
-		dataA = utils.reverse(A, w8);
-		dataB = utils.reverse(B, w8);
-		return utils.byteSum(dataA, dataB);
-	}
-
-	public void encryptFile(String inpFileName, String outFileName) throws IOException, SQLException {
+	public Long encryptFile(RequestInfo info) throws IOException {
 		int bufferSize;
 		byte[] buffer, encoded, w4Array, hash;
 		buffer = new byte[64000];
 		bufferSize = 64000;
 		encoded = new byte[64000];
-		FileInputStream inputStream = new FileInputStream(inpFileName);
-		fileSize = inputStream.getChannel().size();
+		FileInputStream inputStream = new FileInputStream(info.inputFilePath());
 
 		long startTime = System.currentTimeMillis();
 		long finishTime = 0;
-		createOutFile(outFileName);
-		FileOutputStream outputStream = new FileOutputStream(outFileName);
-		hash =  Longs.toByteArray(utils.getCRC32(inpFileName));
+		createOutFile(info.outputFilePath());
+		FileOutputStream outputStream = new FileOutputStream(info.outputFilePath());
+		hash =  Longs.toByteArray(CryptoUtils.getCRC32(info.inputFilePath()));
 		byte[] tmp = hash.clone();
 		hash = new byte[4];
 		System.arraycopy(tmp,4,hash,0,4);
 		outputStream.write(hash);
 		while (inputStream.available() > 0) {
-			task.update((long)inputStream.available(), fileSize);
+			info.progressListener().update((long)inputStream.available(), size);
 			if (inputStream.available() < bufferSize) {
-				bufferSize = inputStream.available()+(w4-bufferSize % w4);
-				buffer = new byte[bufferSize + (w4-bufferSize % w4)];
-				encoded = new byte[bufferSize + (w4-bufferSize % w4)];
+				bufferSize = inputStream.available() + (w4 - bufferSize % w4);
+				buffer = new byte[bufferSize + (w4 - bufferSize % w4)];
+				encoded = new byte[bufferSize + (w4 - bufferSize % w4)];
 			}
 //			noinspection ResultOfMethodCallIgnored
 			inputStream.read(buffer, 0, bufferSize);
 			for (int i = 0; i < bufferSize ; i += w4) {
 				//System.out.println("print "+ i);
-				w4Array = utils.toW4Array(buffer, i, w4);
-				w4Array = utils.xor(w4Array, lastBlock);
-				w4Array = encryptBlock(w4Array);
+				w4Array = CryptoUtils.toW4Array(buffer, i, w4);
+				w4Array = CryptoUtils.xor(w4Array, lastBlock);
+				w4Array = processBlock(w4Array, true);
 				lastBlock = Arrays.copyOf(w4Array, w4);
 				System.arraycopy(w4Array, 0, encoded, i, w4);
 			}
@@ -214,14 +173,7 @@ public class rc5 {
 		}
 		inputStream.close();
 		outputStream.close();
-		encryption.print("Encode time: " + (int) ((finishTime - startTime) / 1000) + " sec");
-		//System.out.println("Encode time: " + (int) ((finishTime - startTime) / 1000) + " sec");
-		if (vector.length<8){
-			sqliteDB.addFileToDB(utils.fromBytes(vector[0],vector[1],vector[2],vector[3]));
-		}
-		else{
-			sqliteDB.addFileToDB(Longs.fromByteArray(vector));
-		}
+		return finishTime - startTime;
 
 	}
 
@@ -234,44 +186,44 @@ public class rc5 {
 				//noinspection ResultOfMethodCallIgnored
 				f.createNewFile();
 			}
-			//System.out.println("Output file created");
-			encryption.print("Output file created");
+			System.out.println("Output file created");
+//			encryption.print("Output file created");
 		} catch (Exception e) {
 			System.out.println("Output file already exists");
 		}
 	}
 
-	public void decryptFile(String inpFileName, String outFileName) throws IOException {
+	public Long decryptFile(RequestInfo info) throws IOException {
 		int bufferSize;
-		byte[] buffer, decoded, hash = new byte[4];
+		byte[] buffer, decoded, w4Array, tempArray, hash;
+		hash = new byte[4];
 		buffer = new byte[64000];
 		bufferSize = 64000;
 		decoded = new byte[64000];
-		FileInputStream inputStream = new FileInputStream(inpFileName);
+		FileInputStream inputStream = new FileInputStream(info.inputFilePath());
 		//noinspection ResultOfMethodCallIgnored
 		inputStream.read(hash, 0, 4);
 		//System.out.println("Read hash: "+ new BigInteger(hash));
 		long startTime = System.currentTimeMillis();
 		long finishTime = 0;
-		byte[] w4Array;
-		byte[] tempArray;
-		createOutFile(outFileName);
-		FileOutputStream outputStream = new FileOutputStream(outFileName);
+		createOutFile(info.outputFilePath());
+		FileOutputStream outputStream = new FileOutputStream(info.outputFilePath());
 		while (inputStream.available() > 0) {
+			info.progressListener().update((long)inputStream.available(), size);
 			decoded = new byte[decoded.length];
 			if (inputStream.available() < bufferSize) {
 				bufferSize = inputStream.available();
 				buffer = new byte[bufferSize];
-				decoded = new byte[(int) (Long.parseLong(cli.size) % 64000)];
+				decoded = new byte[(int) (size % 64000)];
 			}
 			//noinspection ResultOfMethodCallIgnored
 			inputStream.read(buffer, 0, bufferSize);
 			for (int i = 0; i < bufferSize; i += w4) {
 				//System.out.println("print "+ i);
-				w4Array = utils.toW4Array(buffer, i, w4);
+				w4Array = CryptoUtils.toW4Array(buffer, i, w4);
 				tempArray = Arrays.copyOf(w4Array, w4);
-				w4Array = decryptBlock(w4Array);
-				w4Array = utils.xor(w4Array, lastBlock);
+				w4Array = processBlock(w4Array, false);
+				w4Array = CryptoUtils.xor(w4Array, lastBlock);
 				lastBlock = Arrays.copyOf(tempArray, w4);
 				if (decoded.length > i + w4) {
 					System.arraycopy(w4Array, 0, decoded, i, w4);
@@ -285,8 +237,6 @@ public class rc5 {
 		}
 		inputStream.close();
 		outputStream.close();
-		utils.isHashCorrect(utils.getCRC32(outFileName), Long.parseLong(cli.hash));
-		encryption.print("Decode time: " + (int) ((finishTime - startTime) / 1000) + " sec");
-		//System.out.println("Decode time: " + (int) ((finishTime - startTime) / 1000) + " sec");
+		return finishTime - startTime;
 	}
 }
