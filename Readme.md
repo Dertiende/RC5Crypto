@@ -1,22 +1,17 @@
 ## Актуальная версия СКЗИ 
- Ветка **master**.
+ Ветка **cw10**.
  
- Текущая стадия: main.GUI приложение.
+ Текущая стадия: Spring javafx приложение.
 
 ## Используемые библиотеки:
 * javafx;
 * jcommander;
 * com.google.common;
-
-## Окно авторизации:
-
-![login.png](assets/login.png)
-
-## Окно шифрования:
-
-![crypto.png](./assets/crypto.png)
+* postgres;
+* lombok;
+* spring boot;
 
 ## Пример работы на видео:
 
-[![Watch the video](https://img.youtube.com/vi/vnIS6kJiliA/maxresdefault.jpg)](https://youtu.be/vnIS6kJiliA)
+[![Watch the video](https://img.youtube.com/vi/vnIS6kJiliA/maxresdefault.jpg)](https://youtu.be/-7XoboKTiiE) 
 
